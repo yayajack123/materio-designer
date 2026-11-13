@@ -2,9 +2,9 @@
 
 ## Continuous integration
 
-CI runs the production build on pull requests, pushes to `main`, and manual dispatches. It uses Node from `.nvmrc` and pnpm from `package.json`, installs with the committed lockfile, and requires no deployment secrets. It does not deploy the application.
+CI runs lint and the production build on pull requests, pushes to `main`, and manual dispatches. It uses Node from `.nvmrc` and pnpm from `package.json`, installs with the committed lockfile, and requires no deployment secrets. It does not deploy the application.
 
-Lint is not included yet: the existing `lint` script references a missing `.eslintrc.cjs`. Restore the intended ESLint configuration and establish a passing baseline before adding a non-mutating lint check. Do not use `--fix` in CI.
+Run `pnpm lint:check` for non-mutating validation; `pnpm lint` applies fixes. `.eslintrc.cjs` establishes a Vue essential baseline with TypeScript parsing, permits Vuetify dotted slot names, and allows existing single-word route and legacy component names. It is not a TypeScript typecheck or a full style audit. Generated output and the local pnpm store are ignored. Do not use `--fix` in CI.
 
 ## Protect the default branch
 

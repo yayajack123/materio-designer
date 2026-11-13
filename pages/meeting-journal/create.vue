@@ -695,7 +695,7 @@ onBeforeUnmount(() => {
       <!-- Custom Lesson Cards List -->
       <div class="custom-lesson-list" v-if="coveredLessons.length > 0">
         <div
-          v-for="(lesson, idx) in coveredLessons"
+          v-for="lesson in coveredLessons"
           :key="lesson.id"
           class="lesson-card border rounded-lg mb-4 overflow-hidden"
         >

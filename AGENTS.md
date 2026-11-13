@@ -28,20 +28,22 @@ Do not copy design decisions from memory when the tokens or patterns already exi
 
 ### Communication
 
-Always use the [caveman](/Users/user/Documents/Code%20Project/microdemy-DS/.agents/skills/caveman/SKILL.md) skill. Keep communication concise, technical, clear, and aligned with the user's language. Code, API names, commands, and error messages must remain unchanged and use normal technical writing.
+Use the `caveman` skill when available in the agent's skill catalog. Keep communication concise, technical, clear, and aligned with the user's language. Code, API names, commands, and error messages must remain unchanged and use normal technical writing.
 
 ### Design and UI
 
 Use both skills below when creating or revising design/UI:
 
-- [frontend-design](/Users/user/.agents/skills/frontend-design/SKILL.md) for intentional, distinctive visual direction that avoids generic output.
-- [emil-design-eng](/Users/user/.codex/skills/emil-design-eng/SKILL.md) for UI polish, interaction details, component quality, and motion decisions.
+- `frontend-design` for intentional, distinctive visual direction that avoids generic output.
+- `emil-design-eng` for UI polish, interaction details, component quality, and motion decisions.
+
+Resolve skills through the agent's installed skill catalog rather than machine-specific paths. If a skill is unavailable, apply this document's design, accessibility, and interaction rules and report the missing skill; do not assume another developer's home directory exists.
 
 Always align typography, color, and component decisions with [design.md](spec/design.md).
 
 ### Animation
 
-Use the [animate](/Users/user/.codex/skills/animate/SKILL.md) skill when the user requests animation, transition, motion, or a more lively interface.
+Use the `animate` skill when available and the user requests animation, transition, motion, or a more lively interface.
 
 Before writing animation code:
 
@@ -176,7 +178,7 @@ Do not declare completion if important validation fails or if a required decisio
 
 ## 12. Documentation
 
-GitHub CI runs the production build using `.nvmrc` and the `packageManager` field in `package.json`. Keep these versions aligned with local setup. See [GitHub starter maintenance](docs/github-setup.md) for repository rules and the current lint configuration blocker.
+GitHub CI runs `pnpm lint:check` and the production build using `.nvmrc` and the `packageManager` field in `package.json`. Keep these versions aligned with local setup. The lint baseline uses Vue essential checks, permits Vuetify dotted slot names, and allows existing single-word route and legacy component names. Keep pnpm's local store out of Git. See [GitHub starter maintenance](docs/github-setup.md) for repository rules.
 
 When adding tokens, component mappings, layout patterns, or reusable motion rules, update [design.md](spec/design.md) in the same change.
 
