@@ -176,6 +176,8 @@ Do not declare completion if important validation fails or if a required decisio
 
 ## 12. Documentation
 
+GitHub CI runs the production build using `.nvmrc` and the `packageManager` field in `package.json`. Keep these versions aligned with local setup. See [GitHub starter maintenance](docs/github-setup.md) for repository rules and the current lint configuration blocker.
+
 When adding tokens, component mappings, layout patterns, or reusable motion rules, update [design.md](spec/design.md) in the same change.
 
 When making an architectural or workflow decision that applies across features, update this document so future agents follow the same decision.
