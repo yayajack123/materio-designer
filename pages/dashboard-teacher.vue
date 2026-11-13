@@ -1,0 +1,2152 @@
+<script setup lang="ts">
+import teacherWelcomeIllustration from '@images/pages/teacher-welcome-illustration.png'
+import { DotLottieVue } from '@lottiefiles/dotlottie-vue'
+import { avatarText } from '@core/utils/formatters'
+import UiTableView from '@/components/ui/UiTableView.vue'
+
+definePageMeta({
+  sidebarRoute: 'dashboard-teacher',
+})
+
+type WatchlistType = 'Attendance' | 'Productivity' | 'Quiz'
+type RiskLevel = 'Green' | 'Yellow' | 'Red'
+type WatchlistStatus = 'Open' | 'In Progress' | 'Resolved' | 'Failed' | 'No Action' | 'Closed'
+type PendingTab = 'Journal' | 'Reports' | 'Projects'
+type PendingStatus = 'Not Created' | 'Waiting for Daily Journal' | 'Created'
+type ScheduleStatus = 'ready' | 'soon' | 'live'
+
+interface AppreciationItem {
+  title: string
+  quote: string
+  detail: string
+  fallbackIcon: string
+  lordIconSrc: string
+}
+
+interface SummaryItem {
+  label: string
+  value: number
+  period: string
+  icon: string
+  tone: 'primary' | 'info' | 'warning' | 'success'
+}
+
+interface WatchlistItem {
+  id: string
+  name: string
+  initials: string
+  course: string
+  issue: string
+  metric: string
+  type: WatchlistType
+  risk: RiskLevel
+  status: WatchlistStatus
+  window: string
+}
+
+interface PendingTask {
+  id: string
+  student: string
+  book: string
+  category: PendingTab
+  meetingLesson?: string
+  dueDate?: string
+  progressDone?: number
+  progressTotal?: number
+  lesson?: string
+  date?: string
+  classId?: string
+  studentId?: string
+  status?: PendingStatus
+}
+
+interface ScheduleItem {
+  id: string
+  startsAt: string
+  endsAt: string
+  dateLabel: string
+  timeLabel: string
+  name: string
+  type: string
+  students: number
+  status: ScheduleStatus
+}
+
+interface SelfLearningItem {
+  id: string
+  title: string
+  estimate: string
+}
+
+const appreciationItems: AppreciationItem[] = [
+  {
+    title: 'Your consistency gives students room to grow.',
+    quote: 'Small moments of clarity become big leaps over time.',
+    detail: 'You have sent 12 parent updates this month.',
+    fallbackIcon: 'ri-sparkling-2-line',
+    lordIconSrc: '/icons/lordicon/recognition/bar-chart-vertical-grow.json',
+  },
+  {
+    title: 'Eight students moved up a level this month.',
+    quote: 'Progress looks different for every student. You keep making space for it.',
+    detail: 'Student impact is up from your previous review window.',
+    fallbackIcon: 'ri-flag-2-line',
+    lordIconSrc: '/icons/lordicon/recognition/arrow-trending-up-system-outline.json',
+  },
+  {
+    title: 'You are in the top 10% for student satisfaction.',
+    quote: 'The way you listen is part of what students remember.',
+    detail: 'Based on the latest student survey cycle.',
+    fallbackIcon: 'ri-heart-3-line',
+    lordIconSrc: '/icons/lordicon/recognition/confetti-system-outline.json',
+  },
+  {
+    title: 'Three new skills are now part of your toolkit.',
+    quote: 'A prepared teacher makes curiosity feel safe.',
+    detail: 'Your learning record is up to date.',
+    fallbackIcon: 'ri-lightbulb-flash-line',
+    lordIconSrc: '/icons/lordicon/recognition/badge-ribbon-system-outline.json',
+  },
+]
+
+const summaryItems: SummaryItem[] = [
+  { label: 'Parents updated', value: 12, period: 'This month', icon: 'ri-chat-3-line', tone: 'primary' },
+  { label: 'Students impacted', value: 8, period: 'This month', icon: 'ri-arrow-up-circle-line', tone: 'info' },
+  { label: 'Skill growth', value: 3, period: 'This month', icon: 'ri-lightbulb-line', tone: 'warning' },
+  { label: 'Projects submitted', value: 6, period: 'Ready to review', icon: 'ri-folder-check-line', tone: 'success' },
+]
+
+const watchlistTabs: WatchlistType[] = ['Attendance', 'Productivity', 'Quiz']
+const watchlistTab = ref<WatchlistType>('Attendance')
+const watchlistItems = ref<WatchlistItem[]>([
+  { id: 'wl-1', name: 'Alice Johnson', initials: 'AJ', course: 'Coding Xplorer', issue: 'Missed 2 assigned meetings', metric: '2 absences', type: 'Attendance', risk: 'Red', status: 'Open', window: 'Meetings 9–12' },
+  { id: 'wl-2', name: 'Fajar Ramadhan', initials: 'FR', course: 'Python Foundations', issue: 'Learning velocity dropped', metric: '0.25 lessons / meeting', type: 'Productivity', risk: 'Red', status: 'In Progress', window: 'Meetings 9–12' },
+  { id: 'wl-3', name: 'Gita Permata', initials: 'GP', course: 'Web Design Basics', issue: 'Quiz score needs attention', metric: '62 average score', type: 'Quiz', risk: 'Red', status: 'No Action', window: 'Meetings 5–8' },
+  { id: 'wl-4', name: 'Diana Prince', initials: 'DP', course: 'Coding Xplorer', issue: 'One absence in the window', metric: '1 absence', type: 'Attendance', risk: 'Yellow', status: 'Resolved', window: 'Meetings 9–12' },
+  { id: 'wl-5', name: 'Bima Putra', initials: 'BP', course: 'Python Foundations', issue: 'Progress is slower than target', metric: '0.50 lessons / meeting', type: 'Productivity', risk: 'Yellow', status: 'Open', window: 'Meetings 5–8' },
+  { id: 'wl-6', name: 'Nadia Sari', initials: 'NS', course: 'Game Design', issue: 'Quiz score is below target', metric: '74 average score', type: 'Quiz', risk: 'Yellow', status: 'Open', window: 'Meetings 9–12' },
+])
+
+const filteredWatchlist = computed(() => watchlistItems.value.filter(item => item.type === watchlistTab.value))
+const watchlistRedCount = computed(() => watchlistItems.value.filter(item => item.risk === 'Red').length)
+const watchlistTableTabs = watchlistTabs.map(tab => ({ label: tab, value: tab }))
+const watchlistHeaders = [
+  { title: 'STUDENT', key: 'student', sortable: false },
+  { title: 'ISSUE', key: 'issue', sortable: false },
+  { title: 'RISK', key: 'risk', sortable: false },
+  { title: 'STATUS', key: 'status', sortable: false },
+  { title: 'ACTION', key: 'action', sortable: false, align: 'center', width: 120 },
+]
+
+const getAvatarText = (name: string) => {
+  const cleanName = name.replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s+/i, '')
+
+  return avatarText(cleanName)
+}
+
+const pendingTab = ref<PendingTab>('Journal')
+const pendingLoadMoreAmount = 20
+const pendingInitialVisibleCount = 5
+const pendingStudents = [
+  'Alice Johnson',
+  'Diana Prince',
+  'Fajar Ramadhan',
+  'Gita Permata',
+  'Bima Putra',
+  'Nadia Sari',
+  'Raka Aditya',
+]
+const pendingBooks = ['Coding Xplorer', 'Python Foundations', 'Web Design Basics', 'Game Design', 'Scratch Studio']
+
+const pendingItems: Record<PendingTab, PendingTask[]> = {
+  Journal: Array.from({ length: 70 }, (_, index) => ({
+    id: `journal-${index + 1}`,
+    student: pendingStudents[index % pendingStudents.length],
+    studentId: `s${index + 1}`,
+    classId: `${(index % 3) + 1}`,
+    book: pendingBooks[index % pendingBooks.length],
+    meetingLesson: `Meeting ${12 - (index % 4)} - Lesson ${12 - (index % 4)}`,
+    dueDate: index === 0 ? 'Today · 16:00' : index === 1 ? 'Today · 18:00' : index < 5 ? 'Tomorrow' : `${13 + (index % 4)} Sep`,
+    category: 'Journal',
+  })),
+  Reports: Array.from({ length: 12 }, (_, index) => ({
+    id: `report-${index + 1}`,
+    student: pendingStudents[(index + 3) % pendingStudents.length],
+    book: pendingBooks[(index + 2) % pendingBooks.length],
+    progressDone: Math.max(1, 8 - (index % 4)),
+    progressTotal: 8,
+    status: (['Waiting for Daily Journal', 'Not Created', 'Created'] as PendingStatus[])[index % 3],
+    category: 'Reports',
+  })),
+  Projects: Array.from({ length: 8 }, (_, index) => ({
+    id: `project-${index + 1}`,
+    student: pendingStudents[(index + 5) % pendingStudents.length],
+    book: pendingBooks[(index + 3) % pendingBooks.length],
+    lesson: `Lesson ${8 - (index % 5)}`,
+    date: index === 0 ? 'Today · 19:00' : index === 1 ? '12 Sep' : `${13 + (index % 4)} Sep`,
+    category: 'Projects',
+  })),
+}
+
+const activePendingItems = computed(() => pendingItems[pendingTab.value].slice(0, pendingInitialVisibleCount))
+const pendingTotal = computed(() => Object.values(pendingItems).flat().length)
+const activePendingTotal = computed(() => pendingItems[pendingTab.value].length)
+const activePendingRemaining = computed(() => Math.max(0, activePendingTotal.value - activePendingItems.value.length))
+const pendingMoreCount = computed(() => Math.min(pendingLoadMoreAmount, activePendingRemaining.value))
+const hasMorePendingItems = computed(() => activePendingRemaining.value > 0)
+const pendingTableTabs = computed(() => (Object.keys(pendingItems) as PendingTab[]).map(tab => ({
+  label: tab,
+  value: tab,
+  count: pendingItems[tab].length,
+})))
+
+const pendingHeaders = computed(() => {
+  if (pendingTab.value === 'Reports') {
+    return [
+      { title: 'STUDENT NAME', key: 'student', sortable: false },
+      { title: 'BOOK', key: 'book', sortable: false },
+      { title: 'PROGRESS', key: 'progress', sortable: false, minWidth: 180 },
+      { title: 'STATUS', key: 'status', sortable: false, minWidth: 180 },
+      { title: 'ACTION', key: 'action', sortable: false, align: 'center' as const, width: 88 },
+    ]
+  }
+
+  if (pendingTab.value === 'Projects') {
+    return [
+      { title: 'STUDENT NAME', key: 'student', sortable: false },
+      { title: 'BOOK', key: 'book', sortable: false },
+      { title: 'LESSON', key: 'lesson', sortable: false },
+      { title: 'DATE', key: 'date', sortable: false },
+      { title: 'ACTION', key: 'action', sortable: false, align: 'center' as const, width: 120 },
+    ]
+  }
+
+  return [
+    { title: 'STUDENT NAME', key: 'student', sortable: false },
+    { title: 'BOOK', key: 'book', sortable: false },
+    { title: 'MEETING - LESSON', key: 'meetingLesson', sortable: false },
+    { title: 'DUE DATE', key: 'dueDate', sortable: false },
+    { title: 'ACTION', key: 'action', sortable: false, align: 'center' as const, width: 120 },
+  ]
+})
+
+const scheduleItems: ScheduleItem[] = [
+  { id: 'schedule-1', startsAt: '2026-09-11T09:00:00+08:00', endsAt: '2026-09-11T10:30:00+08:00', dateLabel: 'Tomorrow', timeLabel: '09:00–10:30', name: 'Regular Kids', type: 'Adaptive', students: 5, status: 'soon' },
+  { id: 'schedule-2', startsAt: '2026-09-11T14:00:00+08:00', endsAt: '2026-09-11T15:30:00+08:00', dateLabel: 'Tomorrow', timeLabel: '14:00–15:30', name: 'Advanced Teens', type: 'Dynamic', students: 7, status: 'ready' },
+  { id: 'schedule-3', startsAt: '2026-09-12T08:00:00+08:00', endsAt: '2026-09-12T09:30:00+08:00', dateLabel: '12 Sep', timeLabel: '08:00–09:30', name: 'Future Coders', type: 'Adaptive', students: 6, status: 'ready' },
+]
+
+const selfLearningItems: SelfLearningItem[] = [
+  { id: 'learning-1', title: 'Check LMS reflection notes', estimate: '10 min' },
+  { id: 'learning-2', title: 'Review Python Game Dev Lesson 7 material', estimate: '15 min' },
+  { id: 'learning-3', title: 'Prepare for Tech Explorer class tomorrow', estimate: '20 min' },
+]
+
+const currentTime = ref<number | null>(null)
+let countdownTimer: ReturnType<typeof setInterval> | undefined
+
+const nearestScheduleId = computed(() => {
+  const now = currentTime.value ?? Date.now()
+  const upcoming = scheduleItems
+    .filter(item => new Date(item.endsAt).getTime() > now)
+    .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime())
+
+  return upcoming[0]?.id ?? scheduleItems[0]?.id
+})
+
+const getCountdown = (item: ScheduleItem) => {
+  if (!currentTime.value) return item.status === 'soon' ? 'In 45 min' : item.dateLabel
+
+  const start = new Date(item.startsAt).getTime()
+  const end = new Date(item.endsAt).getTime()
+  const diff = start - currentTime.value
+
+  if (currentTime.value >= start && currentTime.value < end) return 'Live now'
+  if (diff <= 0) return item.dateLabel
+  if (diff < 60 * 60 * 1000) return `In ${Math.max(1, Math.round(diff / 60000))} min`
+  if (diff < 24 * 60 * 60 * 1000) return `In ${Math.floor(diff / 3600000)} hrs`
+  return item.dateLabel
+}
+
+onMounted(() => {
+  const updateClock = () => { currentTime.value = Date.now() }
+  updateClock()
+  countdownTimer = setInterval(updateClock, 60000)
+})
+
+onBeforeUnmount(() => {
+  if (countdownTimer) clearInterval(countdownTimer)
+})
+
+const currentAppreciation = ref(0)
+const prefersReducedMotion = ref(false)
+const isMobileViewport = ref(false)
+let reducedMotionMediaQuery: MediaQueryList | undefined
+let mobileViewportMediaQuery: MediaQueryList | undefined
+
+const updateReducedMotion = (event?: MediaQueryListEvent) => {
+  prefersReducedMotion.value = event?.matches ?? reducedMotionMediaQuery?.matches ?? false
+}
+
+const updateMobileViewport = (event?: MediaQueryListEvent) => {
+  isMobileViewport.value = event?.matches ?? mobileViewportMediaQuery?.matches ?? false
+}
+
+let appreciationTimer: ReturnType<typeof setInterval> | undefined
+
+const activeAppreciation = computed(() => appreciationItems[currentAppreciation.value])
+const shouldAutoRotateAppreciation = computed(() => !prefersReducedMotion.value && !isMobileViewport.value)
+
+const changeAppreciation = (direction: 1 | -1) => {
+  currentAppreciation.value = (currentAppreciation.value + direction + appreciationItems.length) % appreciationItems.length
+}
+
+const startAppreciationRotation = () => {
+  if (!shouldAutoRotateAppreciation.value) return
+
+  if (appreciationTimer) clearInterval(appreciationTimer)
+  appreciationTimer = setInterval(() => changeAppreciation(1), 5000)
+}
+
+const pauseAppreciationRotation = () => {
+  if (!appreciationTimer) return
+
+  clearInterval(appreciationTimer)
+  appreciationTimer = undefined
+}
+
+onMounted(() => {
+  reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  updateReducedMotion()
+  reducedMotionMediaQuery.addEventListener('change', updateReducedMotion)
+  mobileViewportMediaQuery = window.matchMedia('(max-width: 760px)')
+  updateMobileViewport()
+  mobileViewportMediaQuery.addEventListener('change', updateMobileViewport)
+  startAppreciationRotation()
+})
+
+watch(shouldAutoRotateAppreciation, shouldRotate => {
+  if (shouldRotate) startAppreciationRotation()
+  else pauseAppreciationRotation()
+})
+
+onBeforeUnmount(() => {
+  pauseAppreciationRotation()
+  reducedMotionMediaQuery?.removeEventListener('change', updateReducedMotion)
+  mobileViewportMediaQuery?.removeEventListener('change', updateMobileViewport)
+})
+
+const riskColor = (risk: RiskLevel) => ({ Green: 'success', Yellow: 'warning', Red: 'error' })[risk]
+const statusColor = (status: WatchlistStatus) => ({
+  Open: 'secondary',
+  'In Progress': 'info',
+  Resolved: 'success',
+  Failed: 'error',
+  'No Action': 'warning',
+  Closed: 'secondary',
+}[status])
+
+type PendingAction = 'journal' | 'report'
+
+const getPendingActionRoute = (task: PendingTask, action?: PendingAction) => {
+  if (action === 'journal' || task.category === 'Journal') {
+    return {
+      name: 'meeting-journal-create',
+      query: {
+        classId: task.classId || '1',
+        studentId: task.studentId || 's1',
+        returnTo: 'dashboard-teacher',
+      },
+    }
+  }
+
+  if (task.category === 'Projects') return { name: 'assessments' }
+
+  return { name: 'reports' }
+}
+
+const getPendingProgressPercent = (task: PendingTask) => {
+  if (!task.progressTotal) return 0
+
+  return Math.round(((task.progressDone || 0) / task.progressTotal) * 100)
+}
+
+const pendingStatusColor = (status?: PendingStatus) => ({
+  'Not Created': 'secondary',
+  'Waiting for Daily Journal': 'warning',
+  Created: 'success',
+}[status || 'Not Created'])
+
+const getPendingViewAllRoute = (tab: PendingTab) => {
+  if (tab === 'Journal') return { name: 'reports', query: { tab: 'daily-journal' } }
+  if (tab === 'Reports') return { name: 'reports', query: { tab: 'reports' } }
+
+  return { name: 'assessments' }
+}
+
+const isActionDialogOpen = ref(false)
+const activeWatchlistItem = ref<WatchlistItem | null>(null)
+const actionNote = ref('')
+const toastShow = ref(false)
+const toastText = ref('')
+const dashboardHeaderAnimationLayout = {
+  fit: 'contain' as const,
+  align: [0.5, 1] as [number, number],
+}
+
+const dashboardHeaderAnimationRenderConfig = {
+  autoResize: true,
+  freezeOnOffscreen: true,
+}
+
+const openActionDialog = (item: WatchlistItem) => {
+  activeWatchlistItem.value = item
+  actionNote.value = ''
+  isActionDialogOpen.value = true
+}
+
+const submitAction = () => {
+  if (!activeWatchlistItem.value) return
+
+  activeWatchlistItem.value.status = 'In Progress'
+  isActionDialogOpen.value = false
+  toastText.value = `Action saved for ${activeWatchlistItem.value.name}`
+  toastShow.value = true
+}
+
+const openSelfLearningItem = (item: SelfLearningItem) => {
+  toastText.value = `${item.title} opened in demo mode`
+  toastShow.value = true
+}
+</script>
+
+<template>
+  <section class="teacher-dashboard">
+    <VRow class="dashboard-layout">
+      <VCol cols="12" md="8" lg="8" class="dashboard-main-column">
+        <main class="dashboard-main">
+          <header class="dashboard-header-wrap dashboard-reveal dashboard-reveal--1">
+          <VCard class="dashboard-card dashboard-header__combined" elevation="0">
+            <div class="dashboard-header__intro">
+              <div class="dashboard-header__content">
+                <h1 class="dashboard-page-title text-h4 text-high-emphasis">
+                  Good morning, Julie.
+                </h1>
+                <p class="text-body-2 text-medium-emphasis mb-0">
+                  A quick view of your classes, student progress, and today’s priorities.
+                </p>
+              </div>
+              <div class="dashboard-header__art" aria-hidden="true">
+                <ClientOnly>
+                  <DotLottieVue
+                    src="/animations/dashboard-teacher-header.lottie"
+                    animation-id="icon"
+                    :autoplay="!prefersReducedMotion"
+                    :loop="!prefersReducedMotion"
+                    :layout="dashboardHeaderAnimationLayout"
+                    :render-config="dashboardHeaderAnimationRenderConfig"
+                    background-color="transparent"
+                    aria-hidden="true"
+                    class="dashboard-header__animation"
+                  />
+                  <template #fallback>
+                    <img
+                      :src="teacherWelcomeIllustration"
+                      alt=""
+                      class="dashboard-header__illustration"
+                    >
+                  </template>
+                </ClientOnly>
+              </div>
+            </div>
+            <section
+              class="recognition-card"
+              aria-label="Personal achievement"
+              @mouseenter="pauseAppreciationRotation"
+              @mouseleave="startAppreciationRotation"
+              @touchstart="pauseAppreciationRotation"
+              @touchend="startAppreciationRotation"
+            >
+              <div class="recognition-banner">
+                <div class="recognition-rail" aria-hidden="true">
+                  <lord-icon
+                    v-if="!prefersReducedMotion"
+                    :key="activeAppreciation.lordIconSrc"
+                    :src="activeAppreciation.lordIconSrc"
+                    trigger="loop"
+                    loading="lazy"
+                    class="recognition-lord-icon current-color"
+                    aria-hidden="true"
+                  />
+                  <VIcon
+                    v-else
+                    :icon="activeAppreciation.fallbackIcon"
+                    size="20"
+                  />
+                </div>
+                <div class="recognition-content">
+                  <Transition name="appreciation-fade" mode="out-in">
+                    <div :key="activeAppreciation.title" class="appreciation-copy" aria-live="polite">
+                      <h2 class="text-h6 font-weight-medium text-high-emphasis mb-1">
+                        {{ activeAppreciation.title }}
+                      </h2>
+                      <p class="text-body-2 text-medium-emphasis mb-1 appreciation-quote">
+                        “{{ activeAppreciation.quote }}”
+                      </p>
+                      <div class="d-flex align-center gap-2 text-caption text-medium-emphasis">
+                        <VIcon icon="ri-checkbox-circle-line" size="15" color="secondary" />
+                        <span class="text-secondary">{{ activeAppreciation.detail }}</span>
+                      </div>
+                    </div>
+                  </Transition>
+                </div>
+              </div>
+              <div class="recognition-progress" aria-label="Appreciation carousel position">
+                <span
+                  v-for="(_, index) in appreciationItems"
+                  :key="index"
+                  class="recognition-progress__item"
+                  :class="{ 'recognition-progress__item--active': index === currentAppreciation }"
+                />
+              </div>
+            </section>
+          </VCard>
+          </header>
+        <section class="dashboard-section dashboard-reveal dashboard-reveal--2" aria-labelledby="summary-heading">
+          <div class="section-heading">
+            <div>
+              <h2 id="summary-heading" class="text-h5 text-high-emphasis mb-0">
+                Your Statistic
+              </h2>
+            </div>
+            <span class="section-meta text-caption">Updated today</span>
+          </div>
+          <div class="summary-grid">
+            <VCard
+              v-for="item in summaryItems"
+              :key="item.label"
+              class="summary-card"
+              :class="`summary-card--${item.tone}`"
+              elevation="0"
+            >
+              <div class="summary-card__top">
+                <VIcon :icon="item.icon" size="19" />
+                <span class="summary-card__period text-caption">{{ item.period }}</span>
+              </div>
+              <span class="summary-card__value text-h3 font-weight-medium">{{ item.value }}</span>
+              <span class="summary-card__label text-body-2 font-weight-medium">{{ item.label }}</span>
+            </VCard>
+          </div>
+        </section>
+
+        <section class="dashboard-section dashboard-reveal dashboard-reveal--3" aria-labelledby="watchlist-heading">
+          <UiTableView
+            v-model:activeTab="watchlistTab"
+            title=""
+            :tabs="watchlistTableTabs"
+            :headers="watchlistHeaders"
+            :items="filteredWatchlist"
+            :items-per-page="-1"
+            hide-filters
+            hide-pagination
+            tabs-inside-card
+            mobile-cards
+            card-class="dashboard-card"
+            table-class="dashboard-table watchlist-table"
+            flat
+            class="dashboard-table-view"
+          >
+            <template #card-header>
+              <div class="card-heading">
+                <div>
+                  <div class="watchlist-title-row">
+                    <h2 id="watchlist-heading" class="text-h5 text-high-emphasis mb-0">
+                      Priority Watchlist
+                    </h2>
+                    <VChip color="error" variant="tonal" size="x-small">{{ watchlistRedCount }} red risks</VChip>
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis mb-0">
+                    Latest fixed-block evaluation · refreshed every Monday
+                  </p>
+                </div>
+                <VBtn
+                  variant="text"
+                  color="primary"
+                  size="small"
+                  class="section-link"
+                  :to="{ name: 'students' }"
+                >
+                  View all
+                  <VIcon end icon="ri-arrow-right-line" size="16" />
+                </VBtn>
+              </div>
+            </template>
+
+            <template #mobile-cards="{ items }">
+              <div
+                v-if="items.length"
+                class="watchlist-mobile-list"
+              >
+                <article
+                  v-for="item in items"
+                  :key="item.id"
+                  class="watchlist-mobile-card"
+                >
+                  <div class="watchlist-mobile-card__topline">
+                    <div class="student-cell watchlist-mobile-card__student">
+                      <VAvatar size="34" color="grey-100" class="border">
+                        <span class="text-caption font-weight-medium text-high-emphasis">
+                          {{ getAvatarText(item.name) }}
+                        </span>
+                      </VAvatar>
+                      <div class="min-w-0">
+                        <h3 class="text-body-1 font-weight-medium mb-1">
+                          {{ item.name }}
+                        </h3>
+                        <p class="text-caption text-medium-emphasis mb-0">
+                          {{ item.course }} · {{ item.window }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="watchlist-mobile-card__risk">
+                      <span class="text-caption text-medium-emphasis">Risk</span>
+                      <VChip :color="riskColor(item.risk)" variant="tonal" size="small" class="status-chip text-caption font-weight-medium">
+                        <span class="status-dot" />
+                        {{ item.risk }}
+                      </VChip>
+                    </div>
+                  </div>
+
+                  <div class="watchlist-mobile-card__issue">
+                    <span class="text-caption text-medium-emphasis">Issue</span>
+                    <span class="text-body-2 text-high-emphasis">{{ item.issue }}</span>
+                    <span class="text-caption text-medium-emphasis">{{ item.metric }}</span>
+                  </div>
+
+                  <div class="watchlist-mobile-card__status">
+                    <span class="text-caption text-medium-emphasis">Status</span>
+                    <VChip :color="statusColor(item.status)" variant="outlined" size="small" class="status-chip text-caption font-weight-medium">
+                      {{ item.status }}
+                    </VChip>
+                  </div>
+
+                  <VBtn
+                    variant="outlined"
+                    color="primary"
+                    rounded="pill"
+                    block
+                    size="small"
+                    class="watchlist-mobile-card__action"
+                    @click="openActionDialog(item)"
+                  >
+                    Action
+                    <VIcon end icon="ri-arrow-right-up-line" size="15" />
+                  </VBtn>
+                </article>
+              </div>
+
+              <div
+                v-else
+                class="empty-cell"
+              >
+                No students in this evaluation view.
+              </div>
+            </template>
+
+            <template #item.student="{ item }">
+              <div class="student-cell">
+                <VAvatar size="34" color="grey-100" class="border">
+                  <span class="text-caption font-weight-medium text-high-emphasis">
+                    {{ getAvatarText(item.name) }}
+                  </span>
+                </VAvatar>
+                <div class="min-w-0">
+                  <span class="student-name font-weight-medium">{{ item.name }}</span>
+                  <span class="student-course text-caption">{{ item.course }} · {{ item.window }}</span>
+                </div>
+              </div>
+            </template>
+
+            <template #item.issue="{ item }">
+              <div class="issue-cell">
+                <span class="issue-title">{{ item.issue }}</span>
+                <span class="issue-metric text-caption">{{ item.metric }}</span>
+              </div>
+            </template>
+
+            <template #item.risk="{ item }">
+              <VChip :color="riskColor(item.risk)" variant="tonal" size="small" class="status-chip text-caption font-weight-medium">
+                <span class="status-dot" />
+                {{ item.risk }}
+              </VChip>
+            </template>
+
+            <template #item.status="{ item }">
+              <VChip :color="statusColor(item.status)" variant="outlined" size="small" class="status-chip text-caption font-weight-medium">
+                {{ item.status }}
+              </VChip>
+            </template>
+
+            <template #item.action="{ item }">
+              <VBtn
+                variant="outlined"
+                color="primary"
+                size="small"
+                class="action-button"
+                @click="openActionDialog(item)"
+              >
+                Action
+              </VBtn>
+            </template>
+
+            <template #no-data>
+              <div class="empty-cell">
+                No students in this evaluation view.
+              </div>
+            </template>
+          </UiTableView>
+        </section>
+
+        <section class="dashboard-section dashboard-reveal dashboard-reveal--4" aria-labelledby="pending-heading">
+          <UiTableView
+            v-model:activeTab="pendingTab"
+            title=""
+            :tabs="pendingTableTabs"
+            :headers="pendingHeaders"
+            :items="activePendingItems"
+            :items-per-page="-1"
+            hide-filters
+            hide-pagination
+            tabs-inside-card
+            mobile-cards
+            card-class="dashboard-card"
+            table-class="dashboard-table pending-table"
+            flat
+            class="dashboard-table-view"
+          >
+            <template #card-header>
+              <div class="card-heading">
+                <div>
+                  <h2 id="pending-heading" class="text-h5 text-high-emphasis mb-1">
+                    Pending Task
+                  </h2>
+                  <p class="text-body-2 text-medium-emphasis mb-0">
+                    {{ pendingTotal }} items are waiting across your workflows
+                  </p>
+                </div>
+              </div>
+            </template>
+
+            <template #mobile-cards="{ items }">
+              <div
+                v-if="items.length"
+                class="pending-mobile-list"
+              >
+                <article
+                  v-for="item in items"
+                  :key="item.id"
+                  class="pending-task-card"
+                >
+                  <div class="pending-task-card__topline">
+                    <div class="min-w-0">
+                      <h3 class="text-body-1 font-weight-medium mb-1">
+                        {{ item.student }}
+                      </h3>
+                    </div>
+
+                    <div
+                      v-if="pendingTab === 'Journal'"
+                      class="pending-task-card__due"
+                    >
+                      <span class="text-caption text-medium-emphasis">Due Date</span>
+                      <span class="due-label text-body-2 font-weight-medium">{{ item.dueDate }}</span>
+                    </div>
+                    <div
+                      v-else-if="pendingTab === 'Projects'"
+                      class="pending-task-card__due"
+                    >
+                      <span class="text-caption text-medium-emphasis">Date</span>
+                      <span class="text-body-2 font-weight-medium">{{ item.date }}</span>
+                    </div>
+                  </div>
+
+                  <div class="pending-task-card__details">
+                    <div>
+                      <span class="text-caption text-medium-emphasis">Book</span>
+                      <span class="text-body-2">{{ item.book }}</span>
+                    </div>
+                    <div v-if="pendingTab === 'Journal'">
+                      <span class="text-caption text-medium-emphasis">Meeting - Lesson</span>
+                      <span class="text-body-2">{{ item.meetingLesson }}</span>
+                    </div>
+                    <div v-else-if="pendingTab === 'Projects'">
+                      <span class="text-caption text-medium-emphasis">Lesson</span>
+                      <span class="text-body-2">{{ item.lesson }}</span>
+                    </div>
+                    <div v-else>
+                      <span class="text-caption text-medium-emphasis">Progress</span>
+                      <div class="pending-progress">
+                        <VProgressLinear
+                          :model-value="getPendingProgressPercent(item)"
+                          color="primary"
+                          height="6"
+                          rounded
+                          class="pending-progress__bar"
+                          aria-hidden="true"
+                        />
+                        <span class="text-body-2 font-weight-medium text-no-wrap">
+                          {{ item.progressDone }}/{{ item.progressTotal }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-if="pendingTab === 'Reports'">
+                      <span class="text-caption text-medium-emphasis">Status</span>
+                      <VChip
+                        :color="pendingStatusColor(item.status)"
+                        variant="tonal"
+                        size="small"
+                        class="pending-status-chip"
+                      >
+                        {{ item.status }}
+                      </VChip>
+                    </div>
+                  </div>
+
+                  <VBtn
+                    v-if="pendingTab !== 'Reports'"
+                    :to="getPendingActionRoute(item)"
+                    variant="outlined"
+                    color="primary"
+                    rounded="pill"
+                    block
+                    size="small"
+                    class="pending-task-card__action"
+                  >
+                    {{ pendingTab === 'Journal' ? 'Create' : 'Review' }}
+                    <VIcon end icon="ri-arrow-right-up-line" size="15" />
+                  </VBtn>
+
+                  <div
+                    v-else
+                    class="pending-task-card__action-row"
+                  >
+                    <VMenu location="bottom end">
+                      <template #activator="{ props: menuProps }">
+                        <VBtn
+                          v-bind="menuProps"
+                          icon
+                          variant="outlined"
+                          color="secondary"
+                          rounded="pill"
+                          size="small"
+                          class="pending-menu-button"
+                          :aria-label="`More actions for ${item.student}`"
+                        >
+                          <VIcon icon="ri-more-2-fill" />
+                          <VTooltip activator="parent" location="top">
+                            More actions
+                          </VTooltip>
+                        </VBtn>
+                      </template>
+                      <VList density="compact" min-width="210">
+                        <VListItem :to="getPendingActionRoute(item, 'journal')">
+                          <template #prepend>
+                            <VIcon icon="ri-book-open-line" />
+                          </template>
+                          <VListItemTitle>Create Daily Journal</VListItemTitle>
+                        </VListItem>
+                        <VListItem :to="getPendingActionRoute(item, 'report')">
+                          <template #prepend>
+                            <VIcon icon="ri-file-list-3-line" />
+                          </template>
+                          <VListItemTitle>Create Report</VListItemTitle>
+                        </VListItem>
+                      </VList>
+                    </VMenu>
+                    <span class="text-caption text-medium-emphasis">Action</span>
+                  </div>
+                </article>
+              </div>
+
+              <div
+                v-else
+                class="empty-cell"
+              >
+                Nothing is waiting here. Keep the good rhythm going.
+              </div>
+            </template>
+
+            <template #item.student="{ item }">
+              <span class="student-name font-weight-medium">{{ item.student }}</span>
+            </template>
+
+            <template #item.book="{ item }">
+              <span class="table-muted text-caption">{{ item.book }}</span>
+            </template>
+
+            <template #item.meetingLesson="{ item }">
+              <span class="table-muted text-caption">{{ item.meetingLesson }}</span>
+            </template>
+
+            <template #item.progress="{ item }">
+              <div class="pending-progress">
+                <VProgressLinear
+                  :model-value="getPendingProgressPercent(item)"
+                  color="primary"
+                  height="6"
+                  rounded
+                  class="pending-progress__bar"
+                  aria-hidden="true"
+                />
+                <span class="text-body-2 font-weight-medium text-no-wrap">
+                  {{ item.progressDone }}/{{ item.progressTotal }}
+                </span>
+              </div>
+            </template>
+
+            <template #item.status="{ item }">
+              <VChip
+                :color="pendingStatusColor(item.status)"
+                variant="tonal"
+                size="small"
+                class="pending-status-chip"
+              >
+                {{ item.status }}
+              </VChip>
+            </template>
+
+            <template #item.lesson="{ item }">
+              <span class="table-muted text-caption">{{ item.lesson }}</span>
+            </template>
+
+            <template #item.date="{ item }">
+              <span class="text-body-2 text-high-emphasis">{{ item.date }}</span>
+            </template>
+
+            <template #item.dueDate="{ item }">
+              <span class="due-label text-body-2 font-weight-medium">{{ item.dueDate }}</span>
+            </template>
+
+            <template #item.action="{ item }">
+              <VBtn
+                v-if="pendingTab !== 'Reports'"
+                :to="getPendingActionRoute(item)"
+                variant="text"
+                color="primary"
+                size="small"
+                class="action-link"
+              >
+                {{ pendingTab === 'Journal' ? 'Create' : 'Review' }}
+                <VIcon end icon="ri-arrow-right-up-line" size="15" />
+              </VBtn>
+
+              <VMenu
+                v-else
+                location="bottom end"
+              >
+                <template #activator="{ props: menuProps }">
+                  <VBtn
+                    v-bind="menuProps"
+                    icon
+                    variant="outlined"
+                    color="secondary"
+                    rounded="pill"
+                    size="small"
+                    class="pending-menu-button"
+                    :aria-label="`More actions for ${item.student}`"
+                  >
+                    <VIcon icon="ri-more-2-fill" />
+                    <VTooltip activator="parent" location="top">
+                      More actions
+                    </VTooltip>
+                  </VBtn>
+                </template>
+                <VList density="compact" min-width="210">
+                  <VListItem :to="getPendingActionRoute(item, 'journal')">
+                    <template #prepend>
+                      <VIcon icon="ri-book-open-line" />
+                    </template>
+                    <VListItemTitle>Create Daily Journal</VListItemTitle>
+                  </VListItem>
+                  <VListItem :to="getPendingActionRoute(item, 'report')">
+                    <template #prepend>
+                      <VIcon icon="ri-file-list-3-line" />
+                    </template>
+                    <VListItemTitle>Create Report</VListItemTitle>
+                  </VListItem>
+                </VList>
+              </VMenu>
+            </template>
+
+            <template #no-data>
+              <div class="empty-cell">
+                Nothing is waiting here. Keep the good rhythm going.
+              </div>
+            </template>
+          </UiTableView>
+
+          <div
+            v-if="hasMorePendingItems"
+            class="pending-more-section"
+            aria-live="polite"
+          >
+            <div class="pending-more-copy">
+              <span class="text-body-2 text-high-emphasis">
+                {{ activePendingRemaining }} more {{ pendingTab }} tasks
+              </span>
+              <span class="text-caption text-medium-emphasis">
+                Showing {{ activePendingItems.length }} of {{ activePendingTotal }}
+              </span>
+            </div>
+            <VBtn
+              variant="outlined"
+              color="primary"
+              rounded="pill"
+              size="small"
+              class="pending-more-button"
+              :to="getPendingViewAllRoute(pendingTab)"
+              :aria-label="`See ${pendingMoreCount} more ${pendingTab} tasks`"
+            >
+              See +{{ pendingMoreCount }} More
+              <VIcon end icon="ri-arrow-right-up-line" size="15" />
+            </VBtn>
+          </div>
+
+          <div
+            v-else-if="activePendingTotal > 0"
+            class="pending-more-section pending-more-section--complete"
+            aria-live="polite"
+          >
+            <span class="text-caption text-medium-emphasis">
+              All {{ pendingTab }} tasks are shown
+            </span>
+          </div>
+        </section>
+        </main>
+      </VCol>
+
+      <VCol cols="12" md="4" lg="4" class="dashboard-aside-column">
+        <aside class="dashboard-aside dashboard-reveal dashboard-reveal--2">
+        <VCard class="schedule-card dashboard-card" elevation="0">
+          <div class="schedule-card__header">
+            <div>
+              <h2 class="text-h5 text-high-emphasis mb-1">Upcoming schedule</h2>
+              <p class="text-body-2 text-medium-emphasis mb-0">Three moments to prepare for</p>
+            </div>
+            <VIcon icon="ri-calendar-schedule-line" color="primary" size="22" />
+          </div>
+          <div class="schedule-list">
+            <div v-for="item in scheduleItems" :key="item.id" class="schedule-item">
+              <div class="schedule-item__time">
+                <span class="schedule-item__date text-caption">{{ item.dateLabel }}</span>
+                <span class="schedule-item__clock text-body-2 font-weight-medium">{{ item.timeLabel }}</span>
+              </div>
+              <div class="schedule-item__rule" />
+              <div class="schedule-item__content">
+                <div class="d-flex align-start justify-space-between gap-2">
+                  <div class="min-w-0">
+                    <span class="schedule-item__name text-body-2 font-weight-medium">{{ item.name }}</span>
+                    <span class="schedule-item__meta text-caption">{{ item.type }} · {{ item.students }} students</span>
+                  </div>
+                  <span
+                    class="schedule-status"
+                    :class="[
+                      `schedule-status--${item.status}`,
+                      { 'schedule-status--nearest': item.id === nearestScheduleId },
+                    ]"
+                    :aria-label="`Schedule status: ${item.status}`"
+                  >
+                    <span class="status-dot" />
+                  </span>
+                </div>
+                <span class="schedule-item__countdown text-caption font-weight-medium">{{ getCountdown(item) }}</span>
+              </div>
+            </div>
+          </div>
+          <VDivider />
+          <VBtn :to="{ name: 'schedule' }" variant="outlined" rounded="pill" color="primary" size="small" class="schedule-view-all">
+            View full schedule
+            <VIcon end icon="ri-arrow-right-line" size="16" />
+          </VBtn>
+        </VCard>
+
+        <VCard class="learning-card dashboard-card dashboard-reveal dashboard-reveal--3" elevation="0">
+          <div class="learning-card__header">
+            <div class="learning-card__title-row">
+              <h2 class="text-h5 text-high-emphasis font-weight-medium mb-0">Self learning reminder</h2>
+            </div>
+          </div>
+          <VDivider />
+          <div class="learning-list">
+            <div v-for="item in selfLearningItems" :key="item.id" class="learning-item">
+              <div class="learning-item__icon" aria-hidden="true">
+                <VIcon icon="ri-book-open-line" color="primary" size="16" />
+              </div>
+              <div class="learning-item__content">
+                <span class="learning-item__title text-body-2 font-weight-medium">{{ item.title }}</span>
+                <span class="learning-item__meta text-caption">
+                  Estimation: {{ item.estimate }}
+                </span>
+              </div>
+              <VBtn
+                variant="outlined"
+                rounded="pill"
+                color="primary"
+                size="small"
+                class="learning-item__action"
+                :aria-label="`Open ${item.title}`"
+                @click="openSelfLearningItem(item)"
+              >
+                Open
+              </VBtn>
+            </div>
+          </div>
+        </VCard>
+
+        <VCard class="freshness-card dashboard-reveal dashboard-reveal--4" elevation="0">
+          <div class="freshness-icon">
+            <VIcon icon="ri-refresh-line" color="primary" size="19" />
+          </div>
+          <div>
+            <p class="text-body-2 text-high-emphasis mb-1">Risk signals refresh every Monday.</p>
+            <p class="text-caption text-medium-emphasis mb-0">Your next watchlist review is ready.</p>
+          </div>
+        </VCard>
+        </aside>
+      </VCol>
+    </VRow>
+
+    <VDialog v-model="isActionDialogOpen" max-width="520">
+      <VCard class="action-dialog" elevation="0">
+        <VCardTitle class="d-flex align-start justify-space-between gap-4 pa-6 pb-2">
+          <div>
+            <span class="text-h5 text-high-emphasis">Follow up with {{ activeWatchlistItem?.name }}</span>
+          </div>
+          <DialogCloseBtn aria-label="Close action dialog" @click="isActionDialogOpen = false" />
+        </VCardTitle>
+        <VCardText class="px-6 pt-3">
+          <div class="action-context mb-5">
+            <VChip v-if="activeWatchlistItem" :color="riskColor(activeWatchlistItem.risk)" variant="tonal" size="small">
+              {{ activeWatchlistItem.risk }} risk
+            </VChip>
+            <span class="text-body-2 text-medium-emphasis">{{ activeWatchlistItem?.issue }}</span>
+          </div>
+          <VTextarea
+            v-model="actionNote"
+            label="Action note"
+            placeholder="Write the next step you will take…"
+            rows="4"
+            variant="outlined"
+            autofocus
+          />
+        </VCardText>
+        <VCardActions class="px-6 pb-6 pt-0 justify-end gap-2">
+          <VBtn variant="text" color="secondary" @click="isActionDialogOpen = false">Cancel</VBtn>
+          <VBtn color="primary" @click="submitAction">Save action</VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
+
+    <VSnackbar v-model="toastShow" color="success" timeout="3000">
+      {{ toastText }}
+    </VSnackbar>
+  </section>
+</template>
+
+<style lang="scss" scoped>
+.teacher-dashboard {
+  --dashboard-line: rgba(var(--v-theme-on-surface), 0.1);
+  --dashboard-muted-line: rgba(var(--v-theme-on-surface), 0.07);
+  --dashboard-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.card-heading,
+.section-heading,
+.schedule-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.dashboard-header-wrap {
+  min-width: 0;
+}
+
+.dashboard-page-title {
+  margin-block: 0 8px;
+}
+
+.dashboard-header__combined {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  overflow: visible;
+  padding: 20px 24px 16px;
+}
+
+.dashboard-header__intro {
+  position: relative;
+  display: flex;
+  min-height: 126px;
+  align-items: center;
+  overflow: visible;
+}
+
+.dashboard-header__content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-width: 0;
+  max-width: 62%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.dashboard-header__content > p {
+  max-width: 360px;
+}
+
+.dashboard-header__art {
+  position: absolute;
+  z-index: 1;
+  right: 12px;
+  bottom: 0;
+  width: min(36%, 190px);
+  aspect-ratio: 558 / 496;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.dashboard-header__illustration,
+.dashboard-header__animation {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+
+.dashboard-header__illustration {
+  object-fit: contain;
+}
+
+.dashboard-header__animation {
+  overflow: visible;
+}
+
+.status-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.dashboard-layout {
+  align-items: start;
+}
+
+.dashboard-main,
+.dashboard-aside {
+  min-width: 0;
+}
+
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.recognition-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  container-type: inline-size;
+}
+
+.recognition-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 112px;
+  border: 1px solid rgba(var(--v-theme-warning), 0.52);
+  border-radius: 6px;
+  background: rgba(var(--v-theme-warning), 0.08);
+  padding: 14px 16px;
+}
+
+.recognition-rail {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 6px;
+  background: rgb(var(--v-theme-surface));
+  color: rgb(var(--v-theme-warning-darken-1));
+}
+
+.recognition-lord-icon {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+
+.recognition-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 64px;
+}
+
+.appreciation-fade-enter-active,
+.appreciation-fade-leave-active {
+  transition: opacity 200ms var(--dashboard-ease-out), transform 200ms var(--dashboard-ease-out);
+}
+
+.appreciation-fade-enter-from,
+.appreciation-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.recognition-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-block-start: 12px;
+}
+
+.appreciation-quote {
+  max-width: 620px;
+}
+
+@container (max-width: 420px) {
+  .recognition-banner {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  .recognition-rail {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .recognition-content {
+    grid-column: 2;
+    width: 100%;
+    min-height: 0;
+  }
+}
+
+.recognition-progress__item {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-on-surface), 0.16);
+  transition: background-color 180ms ease;
+}
+
+.recognition-progress__item--active {
+  width: 18px;
+  background: rgb(var(--v-theme-primary));
+}
+
+.action-button:active,
+.section-link:active,
+.action-link:active {
+  transform: scale(0.97);
+}
+
+.dashboard-section {
+  min-width: 0;
+}
+
+.section-heading {
+  align-items: end;
+  margin-block-end: 14px;
+}
+
+.section-meta {
+  color: rgb(var(--v-theme-secondary));
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
+  position: relative;
+  min-height: 148px;
+  overflow: hidden;
+  border: 1px solid var(--dashboard-line);
+  border-radius: 6px;
+  padding: 18px;
+  transition: transform 180ms var(--dashboard-ease-out), border-color 180ms ease, background-color 180ms ease;
+}
+
+.summary-card::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: rgb(var(--summary-tone));
+  content: '';
+}
+
+.summary-card--primary { --summary-tone: var(--v-theme-primary); }
+.summary-card--info { --summary-tone: var(--v-theme-info); }
+.summary-card--warning { --summary-tone: var(--v-theme-warning); }
+.summary-card--success { --summary-tone: var(--v-theme-success); }
+
+.summary-card__top,
+.summary-card__label,
+.summary-card__period {
+  display: block;
+}
+
+.summary-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: rgb(var(--summary-tone));
+}
+
+.summary-card__period {
+  color: rgb(var(--v-theme-secondary));
+}
+
+.summary-card__value {
+  display: block;
+  color: rgb(var(--v-theme-on-surface));
+  margin-block: 18px 4px;
+}
+
+.summary-card__label {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.dashboard-card {
+  border: 1px solid var(--dashboard-line);
+  border-radius: 6px;
+  background: rgb(var(--v-theme-surface));
+}
+
+.card-heading {
+  padding: 22px 20px 16px;
+}
+
+.watchlist-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 4px;
+}
+
+.section-link {
+  flex: 0 0 auto;
+  margin-block-start: 2px;
+}
+
+.dashboard-table-view :deep(.v-tabs) {
+  padding-inline: 20px;
+}
+
+.dashboard-table-view :deep(.v-tab) {
+  min-width: auto;
+  padding-inline: 14px;
+  color: rgb(var(--v-theme-secondary));
+  text-transform: none;
+}
+
+.dashboard-table-view :deep(.v-tab--selected) {
+  color: rgb(var(--v-theme-primary));
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  margin-inline-start: 6px;
+  padding-inline: 5px;
+}
+
+.dashboard-table {
+  width: 100%;
+}
+
+.dashboard-table-view :deep(.dashboard-table table) {
+  border-collapse: collapse;
+}
+
+.dashboard-table-view :deep(.dashboard-table th) {
+  border-block-end: 1px solid var(--dashboard-muted-line);
+  color: rgb(var(--v-theme-secondary));
+  padding: 13px 20px;
+  text-align: start;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dashboard-table-view :deep(.dashboard-table td) {
+  border-block-end: 1px solid var(--dashboard-muted-line);
+  color: rgb(var(--v-theme-on-surface));
+  padding: 14px 20px;
+  vertical-align: middle;
+}
+
+.dashboard-table-view :deep(.dashboard-table tbody tr:last-child td) {
+  border-block-end: 0;
+}
+
+.dashboard-table-view :deep(.dashboard-table tbody tr) {
+  transition: background-color 160ms ease;
+}
+
+.dashboard-table-view :deep(.dashboard-table tbody tr:hover) {
+  background: rgba(var(--v-theme-primary), 0.025);
+}
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 165px;
+}
+
+.student-name,
+.student-course,
+.issue-title,
+.issue-metric {
+  display: block;
+}
+
+.student-name,
+.issue-title {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.student-course,
+.issue-metric,
+.table-muted {
+  color: rgb(var(--v-theme-secondary));
+  margin-block-start: 3px;
+}
+
+.issue-cell {
+  min-width: 185px;
+}
+
+.status-chip .status-dot {
+  margin-inline-end: 5px;
+}
+
+.action-button {
+  min-width: 72px;
+  text-transform: none;
+}
+
+.empty-cell {
+  color: rgb(var(--v-theme-secondary)) !important;
+  padding: 28px 20px !important;
+  text-align: center;
+}
+
+.due-label {
+  color: rgb(var(--v-theme-warning));
+  white-space: nowrap;
+}
+
+.action-link {
+  text-transform: none;
+}
+
+.pending-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+}
+
+.pending-progress__bar {
+  flex: 1 1 auto;
+  min-width: 72px;
+}
+
+.pending-status-chip {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.pending-menu-button {
+  min-width: 36px;
+}
+
+.pending-more-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid var(--dashboard-line);
+  border-block-start: 0;
+  border-radius: 0 0 6px 6px;
+  background: rgb(var(--v-theme-surface));
+  padding: 14px 20px 16px;
+}
+
+.pending-more-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pending-more-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  text-transform: none;
+}
+
+.pending-more-section--complete {
+  justify-content: center;
+}
+
+.pending-mobile-list {
+  padding: 0 16px 8px;
+}
+
+.pending-task-card {
+  padding: 18px 4px;
+  border-block-end: 1px solid var(--dashboard-muted-line);
+}
+
+.pending-task-card:last-child {
+  border-block-end: 0;
+}
+
+.pending-task-card__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.pending-task-card__details {
+  display: grid;
+  gap: 10px;
+  margin-block-start: 14px;
+}
+
+.pending-task-card__details > div {
+  display: grid;
+  gap: 2px;
+}
+
+.pending-task-card__due {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: end;
+}
+
+.pending-task-card__action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-block-start: 16px;
+}
+
+.pending-task-card__action {
+  min-height: 40px;
+  margin-block-start: 16px;
+  text-transform: none;
+}
+
+.watchlist-mobile-list {
+  padding: 0 16px 8px;
+}
+
+.watchlist-mobile-card {
+  padding: 18px 4px;
+  border-block-end: 1px solid var(--dashboard-muted-line);
+}
+
+.watchlist-mobile-card:last-child {
+  border-block-end: 0;
+}
+
+.watchlist-mobile-card__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.watchlist-mobile-card__student {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.watchlist-mobile-card__student h3,
+.watchlist-mobile-card__student p {
+  overflow-wrap: anywhere;
+}
+
+.watchlist-mobile-card__risk {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: end;
+}
+
+.watchlist-mobile-card__issue {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-block-start: 16px;
+  border-radius: 6px;
+  background: rgba(var(--v-theme-on-surface), 0.035);
+  padding: 10px 12px;
+}
+
+.watchlist-mobile-card__issue > span {
+  overflow-wrap: anywhere;
+}
+
+.watchlist-mobile-card__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block-start: 14px;
+}
+
+.watchlist-mobile-card__action {
+  min-height: 40px;
+  margin-block-start: 16px;
+  text-transform: none;
+}
+
+.schedule-card {
+  overflow: hidden;
+}
+
+.schedule-card__header {
+  padding: 22px 20px 20px;
+}
+
+.schedule-list {
+  padding: 0 20px 10px;
+}
+
+.schedule-item {
+  display: grid;
+  grid-template-columns: 74px 1px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 104px;
+}
+
+.schedule-item__time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block-start: 2px;
+}
+
+.schedule-item__date {
+  color: rgb(var(--v-theme-secondary));
+}
+
+.schedule-item__clock {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.schedule-item__rule {
+  width: 1px;
+  background: var(--dashboard-line);
+}
+
+.schedule-item__content {
+  min-width: 0;
+  padding-block-end: 18px;
+}
+
+.schedule-item__name,
+.schedule-item__meta,
+.schedule-item__countdown {
+  display: block;
+}
+
+.schedule-item__name {
+  overflow: hidden;
+  color: rgb(var(--v-theme-on-surface));
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-item__meta {
+  color: rgb(var(--v-theme-secondary));
+  margin-block-start: 3px;
+}
+
+.schedule-item__countdown {
+  color: rgb(var(--v-theme-primary));
+  margin-block-start: 13px;
+}
+
+.schedule-status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.schedule-status--ready { color: rgb(var(--v-theme-success)); background: rgba(var(--v-theme-success), 0.12); }
+.schedule-status--soon { color: rgb(var(--v-theme-warning)); background: rgba(var(--v-theme-warning), 0.14); }
+.schedule-status--live { color: rgb(var(--v-theme-error)); background: rgba(var(--v-theme-error), 0.12); }
+
+.schedule-status--nearest::after {
+  position: absolute;
+  inset: 2px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+  animation: schedule-status-pulse 1.8s linear infinite;
+}
+
+@keyframes schedule-status-pulse {
+  0% {
+    opacity: 0.65;
+    transform: scale(1);
+  }
+
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+.schedule-view-all {
+  box-sizing: border-box;
+  justify-content: center;
+  width: calc(100% - 32px);
+  min-height: 40px;
+  margin: 12px 16px 16px;
+  padding-inline: 16px;
+  text-transform: none;
+}
+
+.learning-card {
+  overflow: hidden;
+}
+
+.learning-card__header {
+  padding: 16px;
+}
+
+.learning-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.learning-list {
+  padding: 6px 16px 10px;
+}
+
+.learning-item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding-block: 9px;
+}
+
+.learning-item__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(var(--v-theme-primary), 0.08);
+}
+
+.learning-item__content {
+  min-width: 0;
+}
+
+.learning-item__title,
+.learning-item__meta {
+  display: block;
+}
+
+.learning-item__title {
+  color: rgb(var(--v-theme-on-surface));
+  line-height: 1.35;
+}
+
+.learning-item__meta {
+  color: rgb(var(--v-theme-secondary));
+  line-height: 1.35;
+  margin-block-start: 3px;
+}
+
+.learning-item__action {
+  min-width: 52px;
+  min-height: 32px;
+  padding-inline: 11px;
+  text-transform: none;
+}
+
+.freshness-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px dashed rgba(var(--v-theme-primary), 0.28);
+  border-radius: 6px;
+  background: rgba(var(--v-theme-primary), 0.035);
+  padding: 16px;
+}
+
+.freshness-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 6px;
+  background: rgba(var(--v-theme-primary), 0.1);
+}
+
+.action-dialog {
+  border: 1px solid var(--dashboard-line);
+  border-radius: 6px;
+}
+
+.action-context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 6px;
+  background: rgba(var(--v-theme-on-surface), 0.035);
+  padding: 10px 12px;
+}
+
+.dashboard-reveal {
+  animation: dashboard-enter 220ms var(--dashboard-ease-out) both;
+}
+
+.dashboard-reveal--1 { animation-delay: 0ms; }
+.dashboard-reveal--2 { animation-delay: 40ms; }
+.dashboard-reveal--3 { animation-delay: 80ms; }
+.dashboard-reveal--4 { animation-delay: 120ms; }
+.dashboard-reveal--5 { animation-delay: 160ms; }
+
+@keyframes dashboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .summary-card:hover {
+    border-color: rgba(var(--v-theme-primary), 0.28);
+    transform: translateY(-2px);
+  }
+
+}
+
+@media (max-width: 1100px) {
+  .dashboard-header__intro {
+    min-height: 126px;
+  }
+
+  .dashboard-header__art {
+    width: min(36%, 190px);
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-table-view :deep(.v-table__wrapper) {
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dashboard-table-view :deep(.dashboard-table) {
+    min-width: 0;
+  }
+
+  .dashboard-table-view :deep(.dashboard-table table) {
+    min-width: 720px;
+    width: 100%;
+  }
+
+  .dashboard-table-view :deep(.dashboard-table tr) {
+    border: 0;
+    padding: 0;
+  }
+
+  .dashboard-table-view :deep(.dashboard-table th),
+  .dashboard-table-view :deep(.dashboard-table td) {
+    white-space: nowrap;
+  }
+
+  .dashboard-table-view :deep(.dashboard-table tbody tr:last-child td) {
+    border-block-end: 0;
+  }
+
+  .action-button {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  :global(.layout-page-content:has(.teacher-dashboard)) {
+    padding-inline: 16px;
+  }
+
+  .card-heading,
+  .section-heading,
+  .schedule-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-link {
+    align-self: flex-start;
+    margin-inline: 0;
+  }
+
+  .pending-more-section {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pending-more-button {
+    width: 100%;
+  }
+
+  .dashboard-header__combined {
+    height: auto;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .dashboard-header__intro {
+    min-height: 126px;
+  }
+
+  .dashboard-header__content {
+    max-width: 62%;
+  }
+
+  .dashboard-header__art {
+    right: 8px;
+    width: min(54%, 160px);
+  }
+
+  .recognition-card {
+    min-height: 0;
+  }
+
+  .recognition-banner {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  .recognition-rail {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .recognition-content {
+    grid-column: 2;
+  }
+
+  .recognition-content {
+    width: 100%;
+    min-height: 0;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-aside {
+    display: flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-reveal {
+    animation: none;
+  }
+
+  .recognition-progress__item,
+  .summary-card,
+  .dashboard-table-view :deep(.dashboard-table tbody tr) {
+    transition: none;
+  }
+
+  .schedule-status--nearest::after {
+    animation: none;
+    opacity: 0.45;
+    transform: none;
+  }
+
+  .appreciation-fade-enter-active,
+  .appreciation-fade-leave-active {
+    transition: opacity 160ms var(--dashboard-ease-out);
+  }
+
+  .appreciation-fade-enter-from,
+  .appreciation-fade-leave-to {
+    transform: none;
+  }
+}
+</style>
