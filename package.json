@@ -15,7 +15,7 @@
   "dependencies": {
     "@casl/ability": "6.7.1",
     "@casl/vue": "2.2.2",
-    "@floating-ui/dom": "1.6.7",
+    "@floating-ui/dom": "1.8.0",
     "@formkit/drag-and-drop": "0.1.6",
     "@iconify-json/bxl": "1.1.10",
     "@intlify/shared": "10.0.8",
