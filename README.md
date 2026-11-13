@@ -8,6 +8,8 @@ See [the component catalog](docs/components.md) for local component responsibili
 
 ## Setup
 
+GitHub CI, dependency updates, and branch protection setup are documented in [GitHub starter maintenance](docs/github-setup.md). Use Node from `.nvmrc` and pnpm from `package.json`.
+
 For a step-by-step guide to adapting this starter after cloning, see [NEW_PROJECT_SETUP.md](NEW_PROJECT_SETUP.md).
 
 Copy `.env.example` to `.env`, then set the app name, brand color, logo, favicon, API URL, and authentication settings for this deployment.
