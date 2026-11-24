@@ -22,6 +22,29 @@ Konsumen ditentukan dari tag PascalCase/kebab-case dan impor path literal pada s
 - Pertahankan komponen domain akademi/marketing sebagai referensi; penghapusan menu tidak sama dengan penghapusan source atau proteksi route.
 - Contoh tabel starter memakai **scrollable table**, sesuai pilihan pengguna.
 
+## Panduan pemilihan komponen
+
+Pilih berdasarkan perilaku yang dibutuhkan, lalu baca kontrak source. Tabel ini melengkapi mapping [design.md](../spec/design.md), tanpa memperkenalkan komponen atau token baru.
+
+| Kebutuhan | Pilihan | Batasan dan rujukan |
+| --- | --- | --- |
+| Judul, deskripsi, back, aksi halaman | UiSectionHeader | Slot `actions`; `titleClass` default `text-h5`, gunakan `text-h4` bila pola halaman memerlukannya. [Source](../components/ui/UiSectionHeader.vue) |
+| Halaman daftar dengan tab/filter/loading | UiTableView | Parent mengelola filter, error, dan data. Gunakan `header-actions`, `filters`, `reset-filters`, dan `v-model:activeTab`. [CRUD list](../pages/page-template/crud-page/index.vue) |
+| Tabel sederhana di dalam section | VDataTable atau VTable | VDataTable untuk perilaku data seperti pagination; VTable untuk markup tabel statis. Hindari shell halaman ganda. [Table examples](../pages/components/table.vue) |
+| Pagination dari backend | UiTableView dengan slot `table-content` dan tabel/pagination milik parent | `hidePagination` hanya menyembunyikan footer; bukan implementasi fetching server. Lihat mapping tabel di spesifikasi desain |
+| Pengelompokan mobile berbeda | UiTableView `mobileCards` dan slot `mobile-cards` | Keduanya wajib dipasangkan; breakpoint internal 760px. Konfirmasi pilihan layout sesuai agents.md. Default tetap scrollable table |
+| Pilihan lokal | VSelect atau VAutocomplete | VSelect untuk pilihan langsung; VAutocomplete saat pencarian lokal membantu. [Select](../pages/components/select.vue), [Autocomplete](../pages/components/autocomplete.vue) |
+| Pilihan remote dengan pencarian dan pagination | UiAutoComplete | `v-model` dan `callback({ search, page })`; hasil `{ data, meta: { current_page, last_page } }`. Parent menyediakan feedback error; komponen mencatat error ke console. [Source](../components/ui/UiAutoComplete.vue) |
+| Form dasar | VForm, VTextField dan kontrol Vuetify | Ikuti defaults proyek dan validator yang sesuai; halaman memiliki submit/loading/error. [Text Field](../pages/components/text-field.vue), [validators](../@core/utils/validators.ts) |
+| Permukaan dan grid | VCard, VRow/VCol | Gunakan saat grouping dibutuhkan; ikuti gutter 24px dan mapping surface dari spesifikasi |
+| Aksi biasa atau ikon | VBtn atau IconBtn | IconBtn alias VBtn, bukan wrapper lokal; tombol ikon wajib punya accessible name. [Buttons](../pages/components/buttons.vue) |
+| Konfirmasi atau edit singkat | VDialog | Parent memiliki state buka, submit dan target; cek keyboard/focus. [Dialog](../pages/components/dialog.vue), [CRUD list](../pages/page-template/crud-page/index.vue) |
+| Status dan feedback | VChip, VAlert, VSnackbar | Chip untuk status, alert untuk pesan di konteks, snackbar untuk feedback sementara. Toast memakai pola VSnackbar yang sudah ada. [Alert](../pages/components/alert.vue), [Snackbar](../pages/components/snackbar.vue), [Toast](../pages/components/toast.vue) |
+| Langkah proses | AppStepper | Reuse API yang ada dan kontrol Back/Next milik halaman. [Stepper](../pages/components/stepper.vue) |
+| Halaman dokumentasi komponen | BaseComponentDoc | Supply preview/variants/states dan metadata API; jangan duplikasi layout dokumentasi. [Buttons](../pages/components/buttons.vue) |
+
+Sebelum membuat komponen baru, periksa kebutuhan perilaku yang belum terwakili. Komponen domain pada inventaris berikut bukan pengganti otomatis untuk UI generik. Setelah implementasi, gunakan [checklist review desain](design-review.md).
+
 ## Indeks
 
 ### Contoh penggunaan komponen UI proyek

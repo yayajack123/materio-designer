@@ -22,6 +22,8 @@ Before working on design or UI changes:
 3. Inspect related repository implementations before making new decisions.
 4. Search for existing reusable components, composables, utilities, and patterns.
 
+Use [the repository map](docs/architecture.md) to locate implementations and data flows, and [the component selection guide](docs/components.md#panduan-pemilihan-komponen) before introducing UI patterns. Verify contracts in source; these guides do not replace `spec/design.md`.
+
 Do not copy design decisions from memory when the tokens or patterns already exist in `spec/design.md` or the codebase.
 
 ## 3. Required Skills
@@ -148,6 +150,8 @@ Every new page or component must consider:
 - When assumptions are necessary, document them in the plan or final report.
 
 ## 10. Visual Review
+
+Use [the design review checklist](docs/design-review.md) for viewport/theme coverage, interaction states, accessibility, and evidence in the handoff. Mark unavailable checks explicitly; documentation-only changes require link and diff checks rather than screenshots.
 
 If the environment supports screenshots or browser previews, perform a visual review after implementation.
 

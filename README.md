@@ -4,6 +4,8 @@ Nuxt 3 + Vue 3 + Vuetify starter for an admin-only local demo. Navigation contai
 
 ## Component documentation
 
+For agent work, start with [the repository map](docs/architecture.md), [component selection guide](docs/components.md#panduan-pemilihan-komponen), and [design review checklist](docs/design-review.md). [AGENTS.md](AGENTS.md) defines the workflow; [spec/design.md](spec/design.md) remains the source of truth for design tokens and component mapping.
+
 See [the component catalog](docs/components.md) for local component responsibilities, props/defaults, events, models, slots, source links, static consumers, and implementation limitations. [The starter plan](plan/starter-template.md) records navigation scope and the selected scrollable-table presentation on mobile.
 
 ## Setup
