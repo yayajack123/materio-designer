@@ -1,5 +1,11 @@
 # Design System Specification
 
+Buttons (`VBtn`, including `IconBtn`) use zero elevation in default, hover, focus, and active states. Do not add decorative button shadows; preserve existing variant colors and visible focus indicators. Why: keep buttons flat and consistent.
+<!-- 2026-11-25: "tidak ingin ada penggunaan shadow"; "saat ini hanya untuk button" -->
+
+Outlined buttons (`VBtn variant="outlined"`) use `primary` / `primary-main` for both border and foreground text/icon by default. Only pass `error`, `warning`, `success`, or `secondary` on `variant="outlined"` when an action explicitly requires destructive or status-specific emphasis.
+<!-- 2026-11-25: "saya ingin mengubah aturan , untuk outline buttonya defaultnya gunakan warna primary main untuk border dna teksnya" -->
+
 This document is the central reference for the project's typography tokens, color and theme tokens, and mapping between Figma design components and the Vuetify/custom components implemented in the project.
 
 ## 1. Overview
@@ -8,15 +14,43 @@ This document is the central reference for the project's typography tokens, colo
 
 Navigation contains Dashboard (`/`), Foundation (Typography, Color System, Spacing, Iconography under `/design-system/*`), and Component (Buttons, Text Field, Tabs, Stepper, Breadcrumb, Select, Autocomplete, Checkbox, Radio, Switch, Card, Dialog, Table, Pagination under `/components/*`). Both navigation orientations share the same configuration; all submenu icons use `ri-circle-line`. Bottom module navigation is empty. `/design-system` redirects to Typography; `/components` redirects to Buttons. The old `/design-system/component` showcase and existing domain routes remain accessible as references.
 
+### Design system create studio
+
+`/create` provides a dedicated (`layout: 'blank'`, `public: true`) interactive Design System studio inspired by `ui.shadcn.com/create`, linked from the top header navbar on `/landing` and `/create` as well as the admin shell top navbar (`DefaultLayoutWithVerticalNav` and `DefaultLayoutWithHorizontalNav`). Studio chrome retains `Poppins`, semantic `surface`/`background`/`primary`/`secondary` tokens, 4px spacing, and flat pill `VBtn` controls. Live brand and base-neutral (`Materio`, `Zinc`, `Slate`, `Stone`, `Neutral`) selections update active Vuetify light/dark themes while mounted and restore original colors on unmount; font family, corner radius, button shape, card style (`bordered`/`elevated`), and control density apply strictly inside `.create-preview-stage` across the reused `LandingCardsShowcase`, `LandingCrudShowcase`, `LandingFormStepperShowcase`, and `LandingFoundationsShowcase` panels. Per user confirmation, the studio exposes a `Mobile cards` / `Scrollable table` toggle for the CRUD preview and stays out of the left sidebar menu. Outputs provide one-click `Copy AI setup prompt` and zero-dependency client-side `Download how-to (.zip)` (`HOW_TO_SETUP.md`, `AI_SETUP_PROMPT.md`, `.env.example`, `vuetify-overrides.md`, `design-tokens.json`), inspectable via `CodeHighlight`. See [the create page plan](../plan/design-system-create-page.md).
+
+### Design system landing page
+
+The landing Quick setup section follows `NEW_PROJECT_SETUP.md` with four designer-facing steps and a selectable AI-agent setup prompt. Use semantic surface/background colors, existing typography and components, a two-column layout that stacks on mobile, and clipboard success/failure feedback with manual copying available. The section does not run commands or alter configuration. See [the plan](../plan/design-system-landing-page.md#designer-quick-setup).
+
+The Cards showcase uses independent, varied-height card stacks inspired by the supplied shadcn reference. Compact revenue, order status and payment-method examples reuse Digital Dashboard sample figures and existing Vuetify primitives. Keep three columns on desktop, two on tablet and one on mobile, with theme-aware `surface` cards and existing semantic colors; retain interactive form and notification state across tabs. See [the showcase revision](../plan/design-system-landing-page.md#showcase-revision).
+
+`/landing` provides a standalone (`layout: 'blank'`, `public: true`) English showcase inspired by `ui.shadcn.com` with `/` redirecting to `/landing` and the original workspace at `/workspace`. A sticky `surface` header exposes the Materio mark, primary route links (`aria-current="page"` on Overview), and `NavbarThemeSwitcher`. The hero leads into one bordered showcase frame combining four `v-show` tab panels (`LandingCardsShowcase`, `LandingCrudShowcase`, `LandingFoundationsShowcase`, and `LandingFormStepperShowcase`) with live runtime brand-primary presets (`getBrandThemeColors()`), explicit reset to the configured default (`#10AF13`), and accessible `NUXT_PUBLIC_BRAND_PRIMARY` `.env` copy feedback. Per user selection, the CRUD tab configures `UiTableView` with `mobileCards` and an explicit `#mobile-cards` slot below `760px`. Below the showcase, a searchable directory derives links directly from `mainNavItems`. No new typography or color tokens are introduced. See [the landing page plan](../plan/design-system-landing-page.md).
+
 ### CRUD page template
 
-Page & Template > CRUD Page provides a local student demo with a list and separate detail route. The list follows Figma node `6809:83724` with a title, derived summary counts, tabs, filters, and `UiTableView`; use initial avatars, semantic status chips, and horizontally scrolling tables on mobile. Search and status filters apply before pagination and persist across tab changes. Create, edit, and confirmed delete operate on session-only demo data; the detail page shares that state and handles missing records. Detail follows Figma node `361:64855`: student identity, tabs, a two-column Basic info and status layout with 12px card radius, and stacked content on mobile. Missing demo fields and unsupported sections are explicitly unavailable; edit and status changes update local state. See [the implementation plan](../plan/crud-page-template.md).
+Page & Template > CRUD Page provides a local student demo with a list and separate detail route. The list follows Figma node `6809:83724` and the Assessments table pattern with `UiSectionHeader` (`text-h4`), derived summary counts, icon-and-badge tabs, compact filter controls (`prepend-inner-icon="ri-search-line"`, `:reset-disabled`), `UiTableView` with simulated loading and `showViewToggle` (`VExpansionPanels` grouped views), `grey-50` subtly bordered initial avatars, underlined `primary` student links, semantic status chips, `.action-btn` (`34×34px` outlined subtle-ring icon actions), `VSnackbar` feedback, divider-separated `VDialog` modals, and horizontally scrolling tables on mobile. Search and status filters apply before pagination and persist across tab changes. Create, edit, and confirmed delete operate on session-only demo data; the detail page shares that state and handles missing records. Detail follows Figma node `361:64855`: student identity, tabs, a two-column Basic info and status layout with 12px card radius, and stacked content on mobile. Missing demo fields and unsupported sections are explicitly unavailable; edit and status changes update local state. See [the implementation plan](../plan/crud-page-template.md).
 
 The CRUD summary follows Figma node `530:22039`: four outlined surface cards with 20px padding, a label, `text-h4` value, secondary caption, and a 42px tonal icon tile containing a 26px Remix icon. Use 24px grid gutters and wrap to two columns on small screens and one on extra-small screens. Counts derive from the local demo; Trial is unavailable and weekly changes are omitted because no supporting data exists.
 
-Page & Template > Class List follows Figma node `383:33307` with `UiTableView`, Group/Adaptive/Idle datasets, class and teacher two-line cells, initials, schedule dialog, and semantic status chips. Search, grade, course, and status filters persist across tabs and apply before pagination. The local demo uses Active, Scheduled, and Completed; detail and creation remain unavailable. Tables scroll horizontally on mobile. See [the plan](../plan/class-list-template.md).
+Page & Template > Class List follows Figma node `383:33307` and the Assessments table pattern with `UiSectionHeader`, `UiTableView` (`:loading`, `:reset-disabled`), icon-and-count Group/Adaptive/Idle tabs, compact filter controls, class and teacher two-line cells, `grey-50` subtly bordered initial avatars, divider-separated schedule dialog, `.action-btn` row action styling, and semantic status chips. Search, grade, course, and status filters persist across tabs and apply before pagination. The local demo uses Active, Scheduled, and Completed; detail and creation remain unavailable. Tables scroll horizontally on mobile. See [the plan](../plan/class-list-template.md).
+
+### Order template
+
+Each Page & Template example provides a Template prompt dialog with a selectable, copyable project-adaptation brief. `TemplatePrompt` reuses the shared prompt definitions in `data/templatePrompts.ts`; failed clipboard access leaves the full prompt available for manual copying. Prompts preserve each example's selected mobile layout and distinguish demo data from backend integration.
+
+Page & Template > Digital Dashboard ports the Inwan digital-product layout with local sample data, Poppins, semantic theme colors, surface cards and zero elevation. Latest Order keeps horizontal table scrolling on mobile per user selection. Charts honor reduced motion. See [the plan](../plan/digital-dashboard.md).
+
+Page & Template > Order (`/page-template/order`) ports the Inwan Taiwan order list and detail layout. The list uses status tabs, compact search/payment/platform/date filters, bordered order cards with customer/product/payment/total/action columns, and parent-owned pagination. Query `detail` opens the copied domain `OrderDetail` composition: progress, notes, address, products and payment summary on the left; customer/actions on the right. Use Materio Poppins utilities, deployment-aware semantic `primary`, status colors, standard borders, 24px main gaps/padding, and 12px cards with zero elevation. The user selected mobile cards: product rows use `UiTableView` with `mobileCards` and an explicit slot below its existing 760px breakpoint; desktop retains product/price/quantity/subtotal columns. Progress stacks below 600px and detail columns stack below lg. Notes, address, shipping and status edits use session-only demo state; chat and invoices remain unavailable. Copied assets are local and no Inwan brand tokens or authentication are introduced. See [the implementation plan](../plan/order-template.md).
 
 ### Base component documentation
+
+Component documentation Code tabs use `CodeHighlight`, a MazCodeHighlight-inspired bordered, theme-aware code block with a language label, Shiki syntax highlighting, and an accessible copy action. Code remains selectable and scrolls within its frame; if highlighting or clipboard access fails, show plain code or manual-copy guidance. Highlighting follows the current light/dark theme and updates when example code changes.
+
+Component > Code Highlight (`/components/code-highlight`) documents the existing `CodeHighlight` props, copy behavior, fallback and Vue/TypeScript/shell examples through `BaseComponentDoc`. The navigation-derived landing directory includes the page.
+
+Component > Chart (`/components/chart`) documents the ApexCharts (`vue3-apexcharts` inside `ClientOnly`) patterns used on the Digital Product Dashboard through `BaseComponentDoc`: single-series revenue bar, smooth weekly order area trend, semantic five-slice category donut, and grouped platform bar charts. Examples read active Vuetify light/dark semantic colors and Poppins typography, respect `usePreferredReducedMotion()`, reserve height during client hydration, and demonstrate `<figure>`/`<figcaption>` summaries, an optional semantic data table, and loading/empty/error states. No new tokens or dependencies are introduced.
+
+Page & Template > Detail Page (`/page-template/detail-page?id=1&tab=details`) follows the supplied student-detail reference with an identity header, query-synchronized Student details/Session/Books tabs, and Basic info plus Settings cards. Reuse `studentRecords`, Vuetify primitives, semantic description lists, Poppins utilities, 24px gutters/padding, and 12px outlined surface cards with zero elevation. Columns stack below md; field labels stack below 600px. Username copy has success/error feedback; invalid IDs offer recovery. Age is derived from the demo birthday rather than copying the reference's inconsistent age. Session/Books explicitly state that their datasets are not included. See [the plan](../plan/detail-page-template.md).
 
 Component documentation also covers Select, Autocomplete, Checkbox, Radio, Switch, Card, Dialog, Table, Pagination, Avatar, Slider, Chips, Snackbar, Alert, Tooltip, Toast, and Accordion as separate routes with `ri-circle-line` submenu icons. Accordion reuses `VExpansionPanels` and demonstrates single and multiple selection. Demo state is local. Toast uses the existing `VSnackbar` pattern; Snackbar documents its optional action. Table examples use the existing horizontal scroll presentation on mobile; server-side pagination requires parent-owned fetching, totals, and error feedback. UiAutoComplete retains its callback/model API, displays a loading indicator while requests are pending, and uses Vuetify 3 list markup. Parent applications remain responsible for error feedback.
 
@@ -344,7 +378,8 @@ Below details what specific color and typography tokens are configured on these 
 
 - **Typography:** Titles map to `h6` or `subtitle-1`. Text maps to `body-2` or `body-1`.
 - **Colors:**
-  - `VCard` default background uses `surface` (`#FFFFFF` light, `#312D4B` dark).
+  - `VCard` backgrounds use `surface` (`#FFFFFF` light, `#312D4B` dark), including outlined cards; apply `bg-surface` when needed. Why: distinguish cards from the page background while keeping both themes readable.
+  <!-- 2026-11-25: "berikan background putih untuk background cardnya" -->
   - Borders/actions use `grey-100` (`#F5F5F5` light, `#2F3349` dark).
 
 #### Buttons & Actions (`VBtn`, `VIcon`)
@@ -352,8 +387,8 @@ Below details what specific color and typography tokens are configured on these 
 - **Typography:** `VBtn` automatically maps properties of the `button` typography token (15px, medium weight).
 - **Shape:** Every `VBtn` variant uses a full rounded corner radius (`rounded="pill"`, equivalent to `border-radius: 999px`). Keep this rule for flat, outlined, text, tonal, elevated, plain, and icon buttons. Use `VBtnToggle` only when grouped controls require a separate group container treatment.
 - **Colors:**
-  - Primary button: `primary` (`#10AF13`). Hover/Pressed states: `primary-darken-1` (`#108513`).
-  - Secondary button: `secondary` (`#8A8D93`).
+  - Primary button (including default `variant="outlined"` border and text): `primary` / `primary-main` (`#10AF13`). Filled hover/pressed states: `primary-darken-1` (`#108513`).
+  - Secondary button (`text` / `tonal`, or explicit muted override): `secondary` (`#8A8D93`).
   - Error/Delete button: `error` (`#FF4C51`).
   - Icons: Inherit text colors (`text-primary`, `text-secondary`) or dynamic status colors.
 

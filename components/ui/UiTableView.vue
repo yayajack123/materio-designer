@@ -18,6 +18,7 @@ const props = withDefaults(defineProps<{
   loading?: boolean
   itemsPerPage?: number
   hideFilters?: boolean
+  resetDisabled?: boolean
   hidePagination?: boolean
   tabsInsideCard?: boolean
   cardClass?: string
@@ -33,6 +34,7 @@ const props = withDefaults(defineProps<{
   loading: false,
   itemsPerPage: 10,
   hideFilters: false,
+  resetDisabled: false,
   hidePagination: false,
   tabsInsideCard: false,
   cardClass: undefined,
@@ -135,20 +137,19 @@ const viewType = defineModel<string>('viewType', { default: 'list' })
         </VTab>
       </VTabs>
 
-      <VDivider v-if="props.tabsInsideCard && props.tabs && props.tabs.length" />
-
       <!-- Filter Inputs section (up to 2 rows filter) -->
       <VCardText
         v-if="!props.hideFilters"
-        class="d-flex align-center justify-space-between flex-wrap gap-4 py-4"
+        class="ui-table-view__toolbar d-flex align-center justify-space-between flex-wrap gap-4 py-4"
       >
-        <div class="d-flex align-center flex-wrap gap-4 flex-grow-1">
+        <div class="ui-table-view__filters d-flex align-center flex-wrap gap-4 flex-grow-1">
           <slot name="filters" />
-          
+
           <slot name="filter-actions">
             <VBtn
               variant="text"
               color="primary"
+              :disabled="props.resetDisabled"
               @click="emit('reset-filters')"
             >
               Reset Filter
@@ -162,20 +163,33 @@ const viewType = defineModel<string>('viewType', { default: 'list' })
             <VBtnToggle
               v-model="viewType"
               mandatory
+              aria-label="View mode"
               class="custom-toggle-group"
             >
               <VBtn
                 value="list"
-                icon="ri-list-unordered"
-              />
+                icon
+                aria-label="List view"
+              >
+                <VIcon icon="ri-list-unordered" aria-hidden="true" />
+                <VTooltip activator="parent" location="top">List view</VTooltip>
+              </VBtn>
               <VBtn
                 value="team"
-                icon="ri-team-line"
-              />
+                icon
+                aria-label="Group view"
+              >
+                <VIcon icon="ri-team-line" aria-hidden="true" />
+                <VTooltip activator="parent" location="top">Group view</VTooltip>
+              </VBtn>
               <VBtn
                 value="room"
-                icon="ri-door-closed-line"
-              />
+                icon
+                aria-label="Category view"
+              >
+                <VIcon icon="ri-door-closed-line" aria-hidden="true" />
+                <VTooltip activator="parent" location="top">Category view</VTooltip>
+              </VBtn>
             </VBtnToggle>
           </slot>
         </div>
@@ -257,6 +271,52 @@ const viewType = defineModel<string>('viewType', { default: 'list' })
   height: 18px;
 }
 
+.ui-table-view__toolbar {
+  container: table-filters / inline-size;
+}
+
+.ui-table-view__filters {
+  min-inline-size: 0;
+}
+
+:deep(.ui-table-filter) {
+  flex: 0 1 200px;
+  min-inline-size: 180px;
+  max-inline-size: 100%;
+}
+
+:deep(.ui-table-filter--search) {
+  flex-basis: 240px;
+  min-inline-size: 200px;
+}
+
+@container table-filters (inline-size < 36rem) {
+  :deep(.ui-table-filter),
+  :deep(.ui-table-filter--search) {
+    flex: 1 1 100%;
+    min-inline-size: 0;
+  }
+}
+
+:deep(.action-btn) {
+  position: relative;
+  border-color: rgba(var(--v-theme-on-surface), 0.08) !important;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: rgba(var(--v-theme-on-surface), var(--v-hover-opacity));
+    }
+  }
+
+  @media (pointer: coarse) {
+    &::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+    }
+  }
+}
+
 .ui-table-view__mobile-cards {
   display: none;
 }
@@ -299,15 +359,17 @@ const viewType = defineModel<string>('viewType', { default: 'list' })
     &.v-btn--active {
       background-color: rgba(var(--v-theme-on-surface), 0.08) !important;
       color: rgba(var(--v-theme-on-surface), 0.9) !important;
-      
+
       .v-btn__overlay {
         opacity: 0 !important;
       }
     }
 
     // Inactive state styles (non-active hover)
-    &:not(.v-btn--active):hover {
-      background-color: rgba(var(--v-theme-on-surface), 0.04) !important;
+    @media (hover: hover) {
+      &:not(.v-btn--active):hover {
+        background-color: rgba(var(--v-theme-on-surface), 0.04) !important;
+      }
     }
   }
 

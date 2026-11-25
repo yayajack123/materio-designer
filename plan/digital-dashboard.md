@@ -1,0 +1,3 @@
+# Digital product dashboard
+
+Port the Inwan Digital Product dashboard to Page & Template. Reuse VCard, VRow/VCol, ApexCharts and UiTableView; local sample data remains read-only. Preserve revenue, order status, weekly trends, product categories, payment methods, platforms and latest orders. Copy referenced image assets. Use Poppins, semantic theme colors, surface backgrounds and zero elevation. No new dependencies or motion rules. The user selected a horizontally scrollable Latest Order table on mobile, preserving the source layout. Validate lint, build, assets, responsive layout, light/dark themes and reduced motion. Charts use existing reduced-motion support.

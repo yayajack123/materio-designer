@@ -21,6 +21,7 @@ export default {
     // set v-btn default color to primary
     color: 'primary',
     rounded: 'pill',
+    elevation: 0,
   },
   VChip: {
     elevation: 0,

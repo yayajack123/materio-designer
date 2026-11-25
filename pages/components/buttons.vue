@@ -14,7 +14,7 @@ const previewLoading = ref(false)
 const previewCode = computed(() => `<VBtn variant="${previewVariant.value}" size="${previewSize.value}"${previewDisabled.value ? ' disabled' : ''}${previewLoading.value ? ' loading' : ''}>\n  Save item\n</VBtn>`)
 const api = [
   { name: 'variant', type: 'string', description: 'elevated, flat, outlined, tonal, text, or plain. Project default styling retains the pill shape.' },
-  { name: 'color', type: 'string', description: 'Use semantic primary, secondary, success, warning, or error. Project VBtn default is primary.' },
+  { name: 'color', type: 'string', description: 'Use semantic primary, secondary, success, warning, or error. Project VBtn default (including outlined border and text) is primary / primary-main.' },
   { name: 'size / density', type: 'string | number / string', description: 'Set control size and density; preserve an adequate touch target.' },
   { name: 'disabled / loading', type: 'boolean', description: 'Prevent interaction or show a pending operation. Keep the label specific to the action.' },
   { name: '@click', type: 'event', description: 'Connect the action to a real handler. Examples here only update local demo feedback.' },

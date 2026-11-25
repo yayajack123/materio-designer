@@ -12,7 +12,7 @@ Panduan menemukan source sebelum mengubah fitur. Untuk token dan mapping desain,
 | Menu | [vertical/index.ts](../navigation/vertical/index.ts), [horizontal/index.ts](../navigation/horizontal/index.ts) | Horizontal mengekspor konfigurasi menu vertikal yang sama |
 | Komponen proyek | [components/ui](../components/ui) | UiTableView, UiSectionHeader, UiAutoComplete |
 | Komponen template | [@core/components](../@core/components) | Stepper, date picker, editor, theme switcher, dan utilitas UI |
-| Dokumentasi visual | [pages/components](../pages/components), [pages/design-system](../pages/design-system) | Contoh komponen dan foundation |
+| Dokumentasi visual | [pages/components](../pages/components), [pages/design-system](../pages/design-system), [pages/landing.vue](../pages/landing.vue), [pages/create.vue](../pages/create.vue) | Contoh komponen, foundation, landing overview, dan interactive Design System Creator |
 | Logika fitur | [composables](../composables), [utils](../utils) | State/logika reusable dan fungsi pendukung |
 | State auth | [stores/auth.ts](../stores/auth.ts) | User, role, permission, dan computed status autentikasi |
 | API client | [plugins/api.ts](../plugins/api.ts), [repository](../repository) | Penyedia `$api`, modul auth/profile/admin, dan FetchFactory |
@@ -38,6 +38,8 @@ Demo lokal memakai `AUTH_ENABLED=false` dan backend URL kosong. [useCrudPageDemo
 | --- | --- | --- |
 | Daftar, filter, create/edit/delete | [CRUD list](../pages/page-template/crud-page/index.vue) | Data demo satu sesi |
 | Detail dan record tidak ditemukan | [CRUD detail](../pages/page-template/crud-page/%5Bid%5D.vue) | Bagian tanpa data ditandai tidak tersedia |
+| Template detail dengan identitas dan settings | [Detail Page](../pages/page-template/detail-page.vue) | Data siswa lokal; tab Session/Books belum berisi dataset |
+| Daftar dan detail order | [Order template](../pages/page-template/order.vue), [OrderDetail](../components/order/OrderDetail.vue) | Data demo sesi aplikasi; produk mobile menggunakan mobile cards |
 | Tab dataset dan dialog jadwal | [Class List](../pages/page-template/class-list.vue) | Detail dan pembuatan belum tersedia |
 | Dokumentasi komponen interaktif | [Buttons](../pages/components/buttons.vue), [BaseComponentDoc](../components/design-system/BaseComponentDoc.vue) | State contoh lokal |
 | Foundation | [Spacing](../pages/design-system/spacing.vue), [Iconography](../pages/design-system/iconography.vue) | Rujukan token dan pemakaian, bukan fitur domain |

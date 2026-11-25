@@ -1,20 +1,4 @@
 <script setup lang="ts">
-const { public: { appName } } = useRuntimeConfig()
-
-definePageMeta({
-  middleware: ['auth'],
-  sidebarRoute: 'index',
-
-})
+definePageMeta({ layout: 'blank', public: true })
+await navigateTo('/landing', { redirectCode: 302 })
 </script>
-
-<template>
-  <div>
-    <VCard
-      class="mb-6"
-      :title="appName"
-    >
-      <VCardText>Your workspace is ready.</VCardText>
-    </VCard>
-  </div>
-</template>

@@ -4,7 +4,7 @@ Inventaris source sebelum penyederhanaan menu starter. Bahasa API dipertahankan 
 
 ## Cakupan dan cara membaca
 
-Mencakup **97 komponen** dalam `components/`, `@core/components/`, `@layouts/components/`, `layouts/components/`, dan `views/`. Halaman route di `pages/`, root `app.vue`/`error.vue`, serta wrapper Nuxt `layouts/default.vue`/`blank.vue` bukan komponen library dan tidak dihitung; file tersebut tetap diperiksa sebagai konsumen. Vuetify dan library pihak ketiga tidak disalin menjadi entri komponen lokal.
+Mencakup **102 komponen** dalam `components/`, `@core/components/`, `@layouts/components/`, `layouts/components/`, dan `views/`. Halaman route di `pages/`, root `app.vue`/`error.vue`, serta wrapper Nuxt `layouts/default.vue`/`blank.vue` bukan komponen library dan tidak dihitung; file tersebut tetap diperiksa sebagai konsumen. Vuetify dan library pihak ketiga tidak disalin menjadi entri komponen lokal.
 
 Setiap entri mencatat tujuan, kontrak props/default/event/model/expose dari source, slot outlet publik, dan konsumen statis. Kontrak TypeScript adalah cuplikan deklarasi, bukan contoh yang bisa langsung dijalankan. Tipe lokal pendukung disertakan; tipe impor mengikuti sumber aslinya. `defineModel` berarti prop serta event `update:*` yang dihasilkan Vue. Tidak ada deklarasi berarti tidak ada kontrak eksplisit, bukan jaminan tidak menerima fallthrough attrs.
 
@@ -24,6 +24,20 @@ Konsumen ditentukan dari tag PascalCase/kebab-case dan impor path literal pada s
 
 ## Panduan pemilihan komponen
 
+### CodeHighlight
+
+[CodeHighlight](../components/ui/CodeHighlight.vue) menampilkan source melalui props `code: string` dan `language` (`vue`, `ts`, `js`, `html`, `css`, `json`, `bash`; default `vue`). Shiki mengikuti tema dan perubahan kode; fallback menampilkan teks biasa. Tombol copy memberikan status dan panduan manual saat gagal. Digunakan oleh [BaseComponentDoc](../components/design-system/BaseComponentDoc.vue) pada tab Code.
+
+### TemplatePrompt
+
+[TemplatePrompt](../components/ui/TemplatePrompt.vue) menampilkan dan menyalin prompt dari [templatePrompts.ts](../data/templatePrompts.ts). Prop wajib `template` memilih `crud`, `classes`, `detail`, `order`, atau `dashboard`. Dialog menyediakan teks yang dapat dipilih manual jika clipboard gagal dan mengembalikan fokus ke tombol pemicu. Dipakai oleh halaman Page & Template.
+
+### OrderDetail
+
+[Source](../components/order/OrderDetail.vue), dipakai oleh [Order template](../pages/page-template/order.vue). Port komposisi domain dari Inwan Taiwan dengan token Materio. Props: `order` (identitas/customer/produk/status/notes/address/shipping/history), `index: number`, dan `total: number`. Events: `back`, `navigate(index)`, dan `update(changes)`; parent memiliki data demo dan persistensi sesi. Tidak memiliki slot publik. Menyediakan progress, editor notes/address/shipping dan aksi status lokal. Produk menggunakan `UiTableView` dengan slot mobile cards sesuai pilihan pengguna. Chat/invoice belum terhubung; kalkulasi demo memakai [orderPayment.ts](../utils/orderPayment.ts).
+
+### Komponen dasar
+
 Pilih berdasarkan perilaku yang dibutuhkan, lalu baca kontrak source. Tabel ini melengkapi mapping [design.md](../spec/design.md), tanpa memperkenalkan komponen atau token baru.
 
 | Kebutuhan | Pilihan | Batasan dan rujukan |
@@ -41,6 +55,7 @@ Pilih berdasarkan perilaku yang dibutuhkan, lalu baca kontrak source. Tabel ini 
 | Konfirmasi atau edit singkat | VDialog | Parent memiliki state buka, submit dan target; cek keyboard/focus. [Dialog](../pages/components/dialog.vue), [CRUD list](../pages/page-template/crud-page/index.vue) |
 | Status dan feedback | VChip, VAlert, VSnackbar | Chip untuk status, alert untuk pesan di konteks, snackbar untuk feedback sementara. Toast memakai pola VSnackbar yang sudah ada. [Alert](../pages/components/alert.vue), [Snackbar](../pages/components/snackbar.vue), [Toast](../pages/components/toast.vue) |
 | Langkah proses | AppStepper | Reuse API yang ada dan kontrol Back/Next milik halaman. [Stepper](../pages/components/stepper.vue) |
+| Visualisasi data & tren | VueApexCharts dalam ClientOnly | Ikuti warna semantic Vuetify aktif, font Poppins, tinggi eksplisit + fallback hydration, ringkasan teks/tabel aksesibel, dan `usePreferredReducedMotion()`. [Chart](../pages/components/chart.vue), [Digital Dashboard](../pages/page-template/digital-dashboard.vue) |
 | Halaman dokumentasi komponen | BaseComponentDoc | Supply preview/variants/states dan metadata API; jangan duplikasi layout dokumentasi. [Buttons](../pages/components/buttons.vue) |
 
 Sebelum membuat komponen baru, periksa kebutuhan perilaku yang belum terwakili. Komponen domain pada inventaris berikut bukan pengganti otomatis untuk UI generik. Setelah implementasi, gunakan [checklist review desain](design-review.md).
@@ -131,6 +146,12 @@ Contoh berikut dipasang pada template Vue; state dan callback dimiliki halaman p
 | [VueApexCharts.client](#vueapexchartsclient) | Komponen aplikasi | [components/VueApexCharts.client.vue](../components/VueApexCharts.client.vue) |
 | [DesignSystemShowcase](#designsystemshowcase) | Komponen aplikasi | [components/design-system/DesignSystemShowcase.vue](../components/design-system/DesignSystemShowcase.vue) |
 | [BaseComponentDoc](#basecomponentdoc) | Dokumentasi reusable | [components/design-system/BaseComponentDoc.vue](../components/design-system/BaseComponentDoc.vue) |
+| [LandingCardsShowcase](#landingcardsshowcase) | Showcase landing | [components/design-system/landing/LandingCardsShowcase.vue](../components/design-system/landing/LandingCardsShowcase.vue) |
+| [LandingCrudShowcase](#landingcrudshowcase) | Showcase landing | [components/design-system/landing/LandingCrudShowcase.vue](../components/design-system/landing/LandingCrudShowcase.vue) |
+| [LandingFoundationsShowcase](#landingfoundationsshowcase) | Showcase landing | [components/design-system/landing/LandingFoundationsShowcase.vue](../components/design-system/landing/LandingFoundationsShowcase.vue) |
+| [LandingFormStepperShowcase](#landingformsteppershowcase) | Showcase landing | [components/design-system/landing/LandingFormStepperShowcase.vue](../components/design-system/landing/LandingFormStepperShowcase.vue) |
+| [CreateCustomizerPanel](#createcustomizerpanel) | Studio create | [components/design-system/create/CreateCustomizerPanel.vue](../components/design-system/create/CreateCustomizerPanel.vue) |
+| [CreateExportDialog](#createexportdialog) | Studio create | [components/design-system/create/CreateExportDialog.vue](../components/design-system/create/CreateExportDialog.vue) |
 | [AddAuthenticatorAppDialog](#addauthenticatorappdialog) | Dialog | [components/dialogs/AddAuthenticatorAppDialog.vue](../components/dialogs/AddAuthenticatorAppDialog.vue) |
 | [AddEditAddressDialog](#addeditaddressdialog) | Dialog | [components/dialogs/AddEditAddressDialog.vue](../components/dialogs/AddEditAddressDialog.vue) |
 | [AddEditPermissionDialog](#addeditpermissiondialog) | Dialog | [components/dialogs/AddEditPermissionDialog.vue](../components/dialogs/AddEditPermissionDialog.vue) |
@@ -1479,6 +1500,74 @@ defineProps<{
 
 **Konsumen statis:** [pages/design-system/color-system.vue](../pages/design-system/color-system.vue), [pages/design-system/component.vue](../pages/design-system/component.vue), [pages/design-system/typography.vue](../pages/design-system/typography.vue)
 
+## LandingCardsShowcase
+
+**Kelompok:** Showcase landing. **Source:** [components/design-system/landing/LandingCardsShowcase.vue](../components/design-system/landing/LandingCardsShowcase.vue).
+
+Komposisi tiga kolom kartu interaktif (form profil bervalidasi, akses anggota tim, ritme spacing `4px`, preferensi notifikasi, dan ringkasan token) untuk tab Cards pada `/landing`. Seluruh state bersifat lokal per sesi halaman.
+
+**Kontrak eksplisit:**
+
+```ts
+defineEmits<{
+    (e: 'notify', message: string): void;
+}>()
+```
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/landing.vue](../pages/landing.vue)
+
+## LandingCrudShowcase
+
+**Kelompok:** Showcase landing. **Source:** [components/design-system/landing/LandingCrudShowcase.vue](../components/design-system/landing/LandingCrudShowcase.vue).
+
+Pratinjau pola daftar CRUD memakai `UiTableView` dengan mode `mobileCards` dan slot eksplisit `#mobile-cards` di bawah `760px`, terhubung ke state sesi `useCrudPageDemo`.
+
+**Kontrak eksplisit:**
+
+```ts
+defineEmits<{
+    (e: 'notify', message: string): void;
+}>()
+```
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/landing.vue](../pages/landing.vue)
+
+## LandingFoundationsShowcase
+
+**Kelompok:** Showcase landing. **Source:** [components/design-system/landing/LandingFoundationsShowcase.vue](../components/design-system/landing/LandingFoundationsShowcase.vue).
+
+Pratinjau live skala tipografi `Poppins`, swatch warna semantic/opacity tema aktif (`useTheme`), skala spacing `4px`, dan contoh ikon Remix pada `/landing`.
+
+**Kontrak eksplisit:**
+
+Tidak ada props/event/model/expose eksplisit.
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/landing.vue](../pages/landing.vue)
+
+## LandingFormStepperShowcase
+
+**Kelompok:** Showcase landing. **Source:** [components/design-system/landing/LandingFormStepperShowcase.vue](../components/design-system/landing/LandingFormStepperShowcase.vue).
+
+Pratinjau alur tiga langkah memakai `AppStepper` (`layout="centered"`) dengan validasi langkah pertama, kontrol Back/Continue/Reset ramah keyboard, dan cuplikan kode konfigurasi `UiTableView`.
+
+**Kontrak eksplisit:**
+
+```ts
+defineEmits<{
+    (e: 'notify', message: string): void;
+}>()
+```
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/landing.vue](../pages/landing.vue)
+
 ## AddAuthenticatorAppDialog
 
 **Kelompok:** Dialog. **Source:** [components/dialogs/AddAuthenticatorAppDialog.vue](../components/dialogs/AddAuthenticatorAppDialog.vue).
@@ -2714,6 +2803,7 @@ withDefaults(defineProps<{
     loading?: boolean;
     itemsPerPage?: number;
     hideFilters?: boolean;
+    resetDisabled?: boolean;
     hidePagination?: boolean;
     tabsInsideCard?: boolean;
     cardClass?: string;
@@ -2729,6 +2819,7 @@ withDefaults(defineProps<{
     loading: false,
     itemsPerPage: 10,
     hideFilters: false,
+    resetDisabled: false,
     hidePagination: false,
     tabsInsideCard: false,
     cardClass: undefined,
@@ -2932,3 +3023,69 @@ defineEmits(['update:isDrawerOpen', 'userData'])
 **Slot publik:** Tidak ada outlet slot eksplisit.
 
 **Konsumen statis:** [pages/user-variant-2.vue](../pages/user-variant-2.vue), [pages/user.vue](../pages/user.vue)
+
+## CreateCustomizerPanel
+
+**Kelompok:** Studio create. **Source:** [components/design-system/create/CreateCustomizerPanel.vue](../components/design-system/create/CreateCustomizerPanel.vue).
+
+Panel kontrol real-time untuk halaman `/create` (preset, style bordered/elevated, base neutral, brand color + custom hex picker, font, radius, bentuk tombol, density, icon style, mode tabel mobile, mode tema, serta aksi Copy AI prompt dan Download ZIP).
+
+**Kontrak eksplisit:**
+
+```ts
+import type { CreatePresetId, DesignSystemCreateConfig } from '@/utils/designSystemCreate'
+
+withDefaults(defineProps<{
+    config: DesignSystemCreateConfig;
+    isModified: boolean;
+    copyState: 'idle' | 'copied' | 'failed';
+    copyAnnouncement: string;
+    showClose?: boolean;
+}>(), {
+    showClose: false,
+})
+
+defineEmits<{
+    (e: 'apply-preset', presetId: Exclude<CreatePresetId, 'custom'>): void;
+    (e: 'update-field', payload: Partial<DesignSystemCreateConfig>): void;
+    (e: 'randomize'): void;
+    (e: 'reset'): void;
+    (e: 'copy-prompt'): void;
+    (e: 'download-zip'): void;
+    (e: 'inspect-export'): void;
+    (e: 'close'): void;
+}>()
+```
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/create.vue](../pages/create.vue)
+
+## CreateExportDialog
+
+**Kelompok:** Studio create. **Source:** [components/design-system/create/CreateExportDialog.vue](../components/design-system/create/CreateExportDialog.vue).
+
+Dialog pratinjau lima file paket setup (`AI_SETUP_PROMPT.md`, `HOW_TO_SETUP.md`, `.env.example`, `vuetify-overrides.md`, `design-tokens.json`) menggunakan `CodeHighlight`, disertai aksi salin prompt dan unduh `.zip`.
+
+**Kontrak eksplisit:**
+
+```ts
+import type { ExportBundleResult } from '@/utils/designSystemCreate'
+
+defineProps<{
+    modelValue: boolean;
+    bundle: ExportBundleResult;
+    copyState: 'idle' | 'copied' | 'failed';
+}>()
+
+defineEmits<{
+    (e: 'update:modelValue', value: boolean): void;
+    (e: 'copy-prompt'): void;
+    (e: 'download-zip'): void;
+    (e: 'after-leave'): void;
+}>()
+```
+
+**Slot publik:** Tidak ada outlet slot eksplisit.
+
+**Konsumen statis:** [pages/create.vue](../pages/create.vue)

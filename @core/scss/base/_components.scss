@@ -30,10 +30,9 @@
   }
 }
 
-// 👉 Button outline with default color border color
+// 👉 Outlined surfaces with default border color; outlined buttons default to primary-main
 .v-alert--variant-outlined,
 .v-avatar--variant-outlined,
-.v-btn.v-btn--variant-outlined,
 .v-card--variant-outlined,
 .v-chip--variant-outlined,
 .v-list-item--variant-outlined {
@@ -43,6 +42,14 @@
 
   &.text-default {
     border-color: rgba(var(--v-border-color), var(--v-border-opacity));
+  }
+}
+
+.v-btn.v-btn--variant-outlined:not(.action-btn) {
+  &:not([class*="text-"]),
+  &.text-default {
+    color: rgb(var(--v-theme-primary-main));
+    border-color: rgb(var(--v-theme-primary-main));
   }
 }
 

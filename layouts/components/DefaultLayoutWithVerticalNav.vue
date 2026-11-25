@@ -34,6 +34,26 @@ import { VerticalNavLayout } from '@layouts'
           v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
           :languages="themeConfig.app.i18n.langConfig"
         />
+        <VBtn
+          to="/create"
+          size="small"
+          variant="tonal"
+          color="primary"
+          prepend-icon="ri-equalizer-2-line"
+          class="me-2 d-none d-sm-inline-flex"
+        >
+          Create
+        </VBtn>
+        <IconBtn
+          to="/create"
+          class="me-1 d-sm-none"
+          aria-label="Create design system"
+        >
+          <VIcon
+            icon="ri-equalizer-2-line"
+            aria-hidden="true"
+          />
+        </IconBtn>
         <NavbarThemeSwitcher class="me-2" />
         <NavBarNotifications class="me-2" />
 

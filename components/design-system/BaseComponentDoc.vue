@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CodeHighlight from '@/components/ui/CodeHighlight.vue'
 interface ApiItem {
   name: string
   type: string
@@ -17,6 +18,7 @@ defineProps<{
   api: ApiItem[]
   accessibility: string[]
 }>()
+
 </script>
 
 <template>
@@ -43,7 +45,7 @@ defineProps<{
         </div>
         <div id="doc-example-code-panel" v-show="exampleTab === 'code'" role="tabpanel" aria-labelledby="doc-example-code-tab" class="pa-6">
           <p class="text-body-2 text-medium-emphasis mb-4">Template example. Declare the referenced state and handlers in the parent page.</p>
-          <pre class="doc-code bg-background rounded border pa-4 text-body-2"><code class="text-high-emphasis">{{ usage }}</code></pre>
+          <CodeHighlight :code="usage" language="vue" />
         </div>
       </div>
     </section>
@@ -88,7 +90,6 @@ defineProps<{
 .doc-page { min-width: 0; }
 .doc-section { padding-block: 32px; border-block-start: thin solid rgba(var(--v-border-color), var(--v-border-opacity)); }
 .doc-section:last-child { padding-block-end: 0; }
-.doc-code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .doc-api-table :deep(table) { min-width: 600px; }
 .doc-api-table :deep(.v-table__wrapper > table > thead > tr > th),
 .doc-api-table :deep(.v-table__wrapper > table > tbody > tr > th),
