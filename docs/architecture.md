@@ -49,6 +49,7 @@ Routes domain lama tetap tersedia sebagai referensi. Periksa dependensi API, asu
 ## Urutan kerja agent
 
 1. Baca [AGENTS.md](../AGENTS.md), spesifikasi desain, lalu source fitur terkait.
+   Gunakan template dan pattern yang relevan sebagai referensi struktur dan interaksi; sesuaikan domain, konten, data, aksi, dan integrasi dengan kebutuhan pengguna.
 2. Pilih komponen melalui [panduan pemilihan](components.md#panduan-pemilihan-komponen); verifikasi kontrak langsung di source.
 3. Tentukan pemilik state, persistensi, interaksi, dan state gagal sebelum implementasi.
 4. Validasi sesuai [checklist review desain](design-review.md), lalu laporkan bukti dan batasan.

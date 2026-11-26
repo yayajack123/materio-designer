@@ -9,6 +9,8 @@ import mainNavItems from '@/navigation/vertical'
 import { getBrandThemeColors, staticPrimaryColor } from '@/plugins/vuetify/theme'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import tablePageSkillSource from '../.agents/skills/table-page-builder/SKILL.md?raw'
+import auditPageSkillSource from '../.agents/skills/audit-page-design-system/SKILL.md?raw'
 
 definePageMeta({
   layout: 'blank',
@@ -81,6 +83,19 @@ const headerLinks = [
 const setupPrompt = 'Follow NEW_PROJECT_SETUP.md and help me configure this clone for a new application. Read the applicable AGENTS.md instructions and spec/design.md before changing code or UI. Ask for missing product decisions, then make the agreed setup changes and report required environment variables and validation results.'
 const setupCopyStatus = ref('')
 const setupCopyFailed = ref(false)
+const skills = [{
+  name: tablePageSkillSource.match(/^name: (.+)$/m)?.[1] || 'table-page-builder',
+  description: tablePageSkillSource.match(/^description: (.+)$/m)?.[1] || '',
+  components: ['UiTableView', 'VDialog', 'VSnackbar'],
+  categories: ['UI/UX design', 'Page builder'],
+  author: 'Juliarta Arya',
+}, {
+  name: auditPageSkillSource.match(/^name: (.+)$/m)?.[1] || 'audit-page-design-system',
+  description: auditPageSkillSource.match(/^description: (.+)$/m)?.[1] || '',
+  components: ['UiTableView', 'UiSectionHeader', 'Vuetify'],
+  categories: ['UI/UX design', 'Design system audit'],
+  author: 'Juliarta Arya',
+}]
 const setupSteps = [
   { title: 'Clone the starter', description: 'Clone the Materio Designer repository and open the project in your editor.', icon: 'ri-git-repository-line' },
   { title: 'Gather your project details', description: 'Prepare the app name, audience, pages, brand color, and optional logo or favicon.', icon: 'ri-palette-line' },
@@ -372,7 +387,7 @@ const searchGroups = computed(() => filterCatalog(headerSearch.value))
               </VTabs>
 
               <!-- Live Brand Color Presets & Env Copy -->
-              <div class="d-flex flex-wrap align-center gap-2 pb-3 pb-md-2">
+              <div class="showcase-brand-controls d-flex flex-wrap align-center gap-2 pb-3 pb-md-2">
                 <span class="text-caption text-medium-emphasis me-1">Brand:</span>
                 <div
                   role="group"
@@ -454,8 +469,11 @@ const searchGroups = computed(() => filterCatalog(headerSearch.value))
                 role="tabpanel"
                 aria-labelledby="landing-tab-cards"
               >
-                <div class="pa-4 pa-md-6">
-                  <LandingCardsShowcase @notify="notify" />
+                <p id="showcase-gallery-hint" class="showcase-gallery-hint text-body-2 text-medium-emphasis px-4 pt-4 mb-0">
+                  Scroll sideways to explore all components.
+                </p>
+                <div class="showcase-gallery-viewport pa-4 pa-md-6" role="region" aria-label="Component card gallery" aria-describedby="showcase-gallery-hint" tabindex="0">
+                  <LandingCardsShowcase gallery @notify="notify" />
                 </div>
               </div>
 
@@ -521,6 +539,37 @@ const searchGroups = computed(() => filterCatalog(headerSearch.value))
                     <span v-if="setupCopyStatus" role="status" class="text-body-2" :class="setupCopyFailed ? 'text-error' : 'text-success'">{{ setupCopyStatus }}</span>
                   </div>
                   <p class="text-body-2 text-medium-emphasis mt-5 mb-0">The full setup guide is in <code>NEW_PROJECT_SETUP.md</code> in the repository.</p>
+                </VCardText>
+              </VCard>
+            </VCol>
+          </VRow>
+        </div>
+      </section>
+
+      <section id="skills" aria-labelledby="skills-heading" class="py-10 py-md-14 border-t">
+        <div class="landing-container">
+          <div class="mb-6">
+            <h2 id="skills-heading" class="text-h4 font-weight-medium mb-2">Skills</h2>
+          </div>
+          <VRow>
+            <VCol v-for="skill in skills" :key="skill.name" cols="12" md="6">
+              <VCard variant="outlined" class="bg-surface" :elevation="0" height="100%">
+                <VCardText class="pa-6">
+                  <h3 class="text-h5 font-weight-medium mb-3">{{ skill.name }}</h3>
+                  <p class="skill-description text-body-1 text-medium-emphasis mb-6">{{ skill.description }}</p>
+                  <div class="mb-5">
+                    <h4 class="text-body-2 font-weight-medium mb-2">Components used</h4>
+                    <div class="d-flex flex-wrap gap-2">
+                      <VChip v-for="component in skill.components" :key="component" color="primary" variant="tonal" size="small">{{ component }}</VChip>
+                    </div>
+                  </div>
+                  <div class="mb-5">
+                    <h4 class="text-body-2 font-weight-medium mb-2">Category</h4>
+                    <div class="d-flex flex-wrap gap-2">
+                      <VChip v-for="category in skill.categories" :key="category" color="secondary" variant="tonal" size="small">{{ category }}</VChip>
+                    </div>
+                  </div>
+                  <p class="text-body-2 text-medium-emphasis mb-0">Author: <span class="text-high-emphasis">{{ skill.author }}</span></p>
                 </VCardText>
               </VCard>
             </VCol>
@@ -674,6 +723,13 @@ const searchGroups = computed(() => filterCatalog(headerSearch.value))
 }
 
 .quick-setup { scroll-margin-block-start: 80px; }
+#skills { scroll-margin-block-start: 80px; }
+.skill-description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
 .setup-steps { display: flex; flex-direction: column; gap: 24px; padding: 0; margin: 0; list-style: none; }
 .setup-step { display: flex; align-items: flex-start; gap: 16px; }
 .setup-prompt-card { border-radius: 12px; }
@@ -733,12 +789,63 @@ const searchGroups = computed(() => filterCatalog(headerSearch.value))
 }
 
 .landing-showcase-tabs {
+  min-inline-size: 0;
   align-self: end;
   max-inline-size: 100%;
   border-block-end: 0 !important;
 
   :deep(.v-tab__slider) {
     inset-block-end: 0 !important;
+  }
+}
+
+.showcase-toolbar {
+  min-inline-size: 0;
+}
+
+.showcase-gallery-viewport {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+
+  &:focus-visible {
+    outline: 2px solid rgb(var(--v-theme-primary));
+    outline-offset: -2px;
+  }
+}
+
+.showcase-gallery-hint {
+  @media (min-width: 1200px) {
+    display: none;
+  }
+}
+
+@media (max-width: 1199px) {
+  .landing-showcase-tabs {
+    flex: 1 1 100%;
+    inline-size: 100%;
+  }
+
+  .showcase-brand-controls {
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 599px) {
+  .landing-container {
+    padding-inline: 16px;
+  }
+
+  .landing-header__inner {
+    gap: 8px !important;
+  }
+
+  .landing-brand {
+    flex-shrink: 0;
+  }
+
+  .landing-hero .v-btn {
+    max-inline-size: 100%;
   }
 }
 

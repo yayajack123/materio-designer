@@ -56,23 +56,23 @@ const semanticColors = [
 ]
 
 const greyPalette = [
-  { token: 'grey-50', light: '#FAFAFA', dark: '#2A2E42' },
-  { token: 'grey-100', light: '#F5F5F5', dark: '#2F3349' },
-  { token: 'grey-200', light: '#EEEEEE', dark: '#4A5072' },
-  { token: 'grey-300', light: '#E0E0E0', dark: '#5E6692' },
-  { token: 'grey-400', light: '#BDBDBD', dark: '#7983BB' },
-  { token: 'grey-500', light: '#9E9E9E', dark: '#8692D0' },
-  { token: 'grey-600', light: '#757575', dark: '#AAB3DE' },
-  { token: 'grey-700', light: '#616161', dark: '#B6BEE3' },
-  { token: 'grey-800', light: '#424242', dark: '#CFD3EC' },
-  { token: 'grey-900', light: '#212121', dark: '#E7E9F6' },
+  { token: 'grey-50', light: '#FAFAFA', dark: '#18181B' },
+  { token: 'grey-100', light: '#F5F5F5', dark: '#27272A' },
+  { token: 'grey-200', light: '#EEEEEE', dark: '#3F3F46' },
+  { token: 'grey-300', light: '#E0E0E0', dark: '#52525B' },
+  { token: 'grey-400', light: '#BDBDBD', dark: '#71717A' },
+  { token: 'grey-500', light: '#9E9E9E', dark: '#A1A1AA' },
+  { token: 'grey-600', light: '#757575', dark: '#D4D4D8' },
+  { token: 'grey-700', light: '#616161', dark: '#E4E4E7' },
+  { token: 'grey-800', light: '#424242', dark: '#F4F4F5' },
+  { token: 'grey-900', light: '#212121', dark: '#FAFAFA' },
 ]
 
 const surfaceColors = [
-  { token: 'background', light: '#FAFAFA', dark: '#28243D', desc: 'Page background' },
-  { token: 'surface', light: '#FFFFFF', dark: '#312D4B', desc: 'Card / container bg' },
-  { token: 'on-background', light: '#2E263D', dark: '#E7E3FC', desc: 'Body text color' },
-  { token: 'on-surface', light: '#2E263D', dark: '#E7E3FC', desc: 'Text on surface' },
+  { token: 'background', light: '#FAFAFA', dark: '#09090B', desc: 'Page background' },
+  { token: 'surface', light: '#FFFFFF', dark: '#18181B', desc: 'Card / container bg' },
+  { token: 'on-background', light: '#2E263D', dark: '#FAFAFA', desc: 'Body text color' },
+  { token: 'on-surface', light: '#2E263D', dark: '#FAFAFA', desc: 'Text on surface' },
 ]
 
 // ───────── Component showcase helpers ─────────

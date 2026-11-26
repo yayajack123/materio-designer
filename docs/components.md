@@ -30,7 +30,7 @@ Konsumen ditentukan dari tag PascalCase/kebab-case dan impor path literal pada s
 
 ### TemplatePrompt
 
-[TemplatePrompt](../components/ui/TemplatePrompt.vue) menampilkan dan menyalin prompt dari [templatePrompts.ts](../data/templatePrompts.ts). Prop wajib `template` memilih `crud`, `classes`, `detail`, `order`, atau `dashboard`. Dialog menyediakan teks yang dapat dipilih manual jika clipboard gagal dan mengembalikan fokus ke tombol pemicu. Dipakai oleh halaman Page & Template.
+[TemplatePrompt](../components/ui/TemplatePrompt.vue) menampilkan dan menyalin prompt dari [templatePrompts.ts](../data/templatePrompts.ts). Prop wajib `template` memilih `crud`, `classes`, `detail`, `order`, `dashboard`, `chat`, atau `form`. Prompt menggunakan contoh sebagai referensi struktur dan interaksi, sedangkan konten dan data disesuaikan dengan kebutuhan pengguna. Dialog menyediakan teks yang dapat dipilih manual jika clipboard gagal dan mengembalikan fokus ke tombol pemicu. Dipakai oleh halaman Page & Template.
 
 ### OrderDetail
 

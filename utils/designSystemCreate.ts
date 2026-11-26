@@ -91,22 +91,22 @@ export const BASE_COLOR_PALETTES: NeutralThemePalette[] = [
       'grey-900': '#212121',
     },
     dark: {
-      'background': '#28243D',
-      'on-background': '#E7E3FC',
-      'surface': '#312D4B',
-      'on-surface': '#E7E3FC',
-      'skin-bordered-background': '#312D4B',
-      'skin-bordered-surface': '#312D4B',
-      'grey-50': '#2A2E42',
-      'grey-100': '#2F3349',
-      'grey-200': '#4A5072',
-      'grey-300': '#5E6692',
-      'grey-400': '#7983BB',
-      'grey-500': '#8692D0',
-      'grey-600': '#AAB3DE',
-      'grey-700': '#B6BEE3',
-      'grey-800': '#CFD3EC',
-      'grey-900': '#E7E9F6',
+      'background': '#09090B',
+      'on-background': '#FAFAFA',
+      'surface': '#18181B',
+      'on-surface': '#FAFAFA',
+      'skin-bordered-background': '#18181B',
+      'skin-bordered-surface': '#18181B',
+      'grey-50': '#18181B',
+      'grey-100': '#27272A',
+      'grey-200': '#3F3F46',
+      'grey-300': '#52525B',
+      'grey-400': '#71717A',
+      'grey-500': '#A1A1AA',
+      'grey-600': '#D4D4D8',
+      'grey-700': '#E4E4E7',
+      'grey-800': '#F4F4F5',
+      'grey-900': '#FAFAFA',
     },
   },
   {
@@ -588,7 +588,7 @@ Apply my selected Design System configuration from /create:
 - Brand primary color: ${brand.primary.toUpperCase()} (light: ${brand['primary-light'].toUpperCase()}, dark: ${brand['primary-darken-1'].toUpperCase()}, on-primary: #FFFFFF) -> set NUXT_PUBLIC_BRAND_PRIMARY="${brand.primary.toUpperCase()}" in .env and .env.example
 - Card & shell style: ${config.style === 'bordered' ? 'Skins.Bordered (1px border, flat surface)' : 'Skins.Default (elevated surface shadow)'} in themeConfig.ts
 - Default theme mode: '${config.themeMode}' in themeConfig.ts
-- Base neutral palette: ${neutral.label}${isDefaultNeutral ? ' (keep existing Materio light/dark greys in plugins/vuetify/theme.ts)' : ` (update background/surface/on-surface and grey-50..grey-900 in plugins/vuetify/theme.ts: light background ${neutral.light.background}, light surface ${neutral.light.surface}, on-surface ${neutral.light['on-surface']}; dark background ${neutral.dark.background}, dark surface ${neutral.dark.surface}, on-surface ${neutral.dark['on-surface']})`}
+- Base neutral palette: ${neutral.label}${isDefaultNeutral ? ' (keep existing Materio light and Zinc dark neutrals in plugins/vuetify/theme.ts)' : ` (update background/surface/on-surface and grey-50..grey-900 in plugins/vuetify/theme.ts: light background ${neutral.light.background}, light surface ${neutral.light.surface}, on-surface ${neutral.light['on-surface']}; dark background ${neutral.dark.background}, dark surface ${neutral.dark.surface}, on-surface ${neutral.dark['on-surface']})`}
 - Font family: ${font.label}${isDefaultFont ? ' (keep existing Poppins setup)' : ` (load ${font.label} stylesheet in nuxt.config.ts head.link and set $font-family-custom to ${font.stack} in @core/scss/template/libs/vuetify/_variables.scss, then update spec/design.md)`}
 - Corner radius: ${config.radius}px cards/surfaces, button shape: ${config.buttonShape === 'pill' ? 'pill (rounded: "pill" in plugins/vuetify/defaults.ts)' : `matched corner radius (${config.radius}px — set VBtn rounded to "${config.radius}px" or remove pill override in plugins/vuetify/defaults.ts)`}; outlined buttons (variant="outlined") default to primary / primary-main for border and text
 - Form & control density: '${config.density}' in plugins/vuetify/defaults.ts
@@ -597,7 +597,8 @@ Apply my selected Design System configuration from /create:
 
 Before editing pages or navigation:
 1. Ask me concise questions for missing product details (application name, target users/roles, modules/pages to keep or add, and backend API URL).
-2. Preserve unrelated files, update spec/design.md and README.md for any changed tokens/defaults, and run \`pnpm lint:check\` and \`pnpm build\` to verify.`
+2. For requested UI, inspect existing templates and patterns and offer a suitable structure when relevant. Adapt content, fields, data models, actions, routes, and integrations to my requirements; treat example domains and data as references, not fixed requirements. Do not assume demo integrations exist.
+3. Preserve unrelated files, update spec/design.md and README.md for any changed tokens/defaults, and run \`pnpm lint:check\` and \`pnpm build\` to verify.`
 
   const overridesMarkdown = `# Vuetify & Theme Overrides Reference
 

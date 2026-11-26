@@ -1,5 +1,13 @@
 # Design system landing page plan
 
+## Skills directory
+
+- **Goal and scope:** Show the repository-owned `table-page-builder` and `audit-page-design-system` skills after Quick setup on `/landing`; no external skills, installation flow, search, new route, or table.
+- **Files and reuse:** Update `pages/landing.vue`, this plan, and `spec/design.md`. Reuse `VCard`, `VRow`/`VCol`, and `VChip`. No component gap or dependency.
+- **Data and interactions:** Import each selected `SKILL.md` as raw text at build time and derive name/description, then render a shared card template from a skills array. Show component chips, categories (`UI/UX design` plus `Page builder` or `Design system audit`), and author `Juliarta Arya`. Component chips represent applicable building blocks documented by the skill. No installation or execution.
+- **Tokens and layout:** Existing Poppins heading/body utilities, semantic surface/background/primary/secondary, 24px padding/gutters. Two outlined cards per row from `md` (`cols="12" md="6"`), stacking on mobile; vertically stack title, description clamped to three lines, components, categories, and author. Chips wrap on mobile. No new tokens or motion.
+- **Risks and validation:** List only the selected repository skills. Check lint/build, mobile/desktop light/dark, three-line limit, wrapping, and scoped diff. Loading/empty/action states are inapplicable to these static entries.
+
 ## Designer quick setup
 
 - **Goal:** Help a designer start a new project with an AI agent using `NEW_PROJECT_SETUP.md` as the source of truth. Add a navbar anchor and a section between the showcase and directory.
@@ -9,6 +17,15 @@
 - **Validation:** Check anchor navigation, clipboard success/failure and keyboard access, desktop/mobile and light/dark, lint, build, links and diff. Do not execute setup commands or alter configuration.
 
 ## Showcase revision
+
+### Responsive gallery refinement
+
+- **Goal:** Follow the user's shadcn screenshot: keep varied-height columns side by side on narrow screens rather than stacking all examples into one long column.
+- **Files and reuse:** `pages/landing.vue`, `LandingCardsShowcase.vue`, this plan and `spec/design.md`. Reuse existing cards and controls; add an optional `gallery` prop so the Create studio keeps its existing layout. No new component or dependency.
+- **Layout and tokens:** Three equal columns, minimum 320px each, 24px gaps and existing card padding; preserve Poppins and semantic themes. Native horizontal scrolling stays inside the Cards panel, with a keyboard-focusable region and visible scroll hint. No scaling or decorative fade over interactive content. At widths below 1200px, tabs and brand controls use separate toolbar rows; mobile outer gutters are 16px.
+- **State and scope:** Existing local demo state, tab persistence, brand switching and notifications remain intact. CRUD's previously selected mobile-card presentation remains unchanged; this refinement introduces no table or new data flow.
+- **Risk and validation:** Check card readability and page overflow at 390/768/1440px in light/dark, keyboard scrolling and tabs, lint and production build. Preserve unrelated working-tree changes.
+- **Visual review evidence:** `/landing` inspected in-browser at 390×844 light/dark, 768×1024 light, and 1440×900 dark. Document scroll width matched viewport width; gallery columns measured 320px on mobile/tablet and approximately 399px on desktop. Screenshots inspected in-session. Cards/Foundations tab switching passed. Full light/dark viewport matrix, 200% zoom, clipboard paths, and keyboard horizontal-scroll movement were not fully verified; no new motion was added.
 
 - **Goal:** Match the supplied shadcn reference's independently stacked, varied-height cards while keeping the landing showcase interactive and aligned with Materio.
 - **Scope:** Revise the Cards panel and its showcase framing in `LandingCardsShowcase.vue` and `pages/landing.vue`; document the pattern in `spec/design.md`. Other tabs and their selected table presentations remain unchanged.

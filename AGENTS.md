@@ -26,6 +26,10 @@ Use [the repository map](docs/architecture.md) to locate implementations and dat
 
 Do not copy design decisions from memory when the tokens or patterns already exist in `spec/design.md` or the codebase.
 
+### Templates and patterns as agent context
+
+Treat all existing templates, pages, components, and patterns as references for structure and interaction when a user requests a similar UI. Inspect the relevant implementation and component contracts, then propose or reuse the closest suitable structure in the implementation plan. Adapt content, labels, fields, data models, actions, routes, and integrations to the user's requirements; example domains and demo data are not requirements. Ask only for missing decisions that materially affect the result. Do not imply that a demo integration or backend exists. Keep the project's design tokens and accessibility rules as the source of truth.
+
 ## 3. Required Skills
 
 ### Communication

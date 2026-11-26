@@ -1,6 +1,10 @@
 # Design System Specification
 
-Buttons (`VBtn`, including `IconBtn`) use zero elevation in default, hover, focus, and active states. Do not add decorative button shadows; preserve existing variant colors and visible focus indicators. Why: keep buttons flat and consistent.
+Page & Template > Form (`/page-template/form`) adapts Figma's promotion form into a local demo: language tabs and grouped basic, detail, and discount cards beside a settings/image card, stacking on mobile. Use Poppins, semantic theme colors, outlined 12px surface cards, 24px padding, Vuetify form controls, and the existing Template prompt. Validation and save/discard are local only. See [the form template plan](../plan/form-template.md).
+
+The `/page-template/chat` demo maps the Figma chat layout to Poppins, semantic `primary`, `surface`, and `chat-bg` colors. It uses a 370px conversation list on desktop and switches between list and conversation on mobile. A floating Customer Chat box shares the same demo conversations and provides collapsed, empty, selected, reply, and template states; its list and conversation switch on mobile. Pointer-triggered open/close uses a 200ms opacity and transform transition from the launcher with `cubic-bezier(.23, 1, .32, 1)`; reduced motion removes movement and keyboard activation is immediate. Search, read filters, replies, templates, and sending operate on local session data; no backend delivery is implied. See [the chat template plan](../plan/chat-template.md).
+
+Buttons (`VBtn`, including `IconBtn`) use zero elevation in default, hover, focus, and active states. Do not add decorative button shadows; preserve existing variant colors and visible focus indicators. The collapsed Customer Chat launcher is an exception: it uses a top shadow and square bottom corners to match its floating panel. Why: keep other buttons flat and consistent.
 <!-- 2026-11-25: "tidak ingin ada penggunaan shadow"; "saat ini hanya untuk button" -->
 
 Outlined buttons (`VBtn variant="outlined"`) use `primary` / `primary-main` for both border and foreground text/icon by default. Only pass `error`, `warning`, `success`, or `secondary` on `variant="outlined"` when an action explicitly requires destructive or status-specific emphasis.
@@ -20,9 +24,11 @@ Navigation contains Dashboard (`/`), Foundation (Typography, Color System, Spaci
 
 ### Design system landing page
 
+The Skills section after Quick setup lists the selected repository skills `table-page-builder` and `audit-page-design-system` as outlined surface cards in a two-column grid from `md`, stacking in one column on mobile (`VCol cols="12" md="6"`). Stack title, description (clamped to three lines), applicable components as primary tonal chips, categories (`UI/UX design` plus `Page builder` or `Design system audit`) as secondary tonal chips, and author (`Juliarta Arya`). Names and descriptions come from each skill's `SKILL.md` through build-time raw imports; component chips identify applicable skill building blocks rather than mandatory usage on every generated page. Reuse existing typography, semantic tokens, 24px grid gutters and padding; chips wrap on mobile. Omit example prompts, copy actions, icons, and instructions dialogs.
+
 The landing Quick setup section follows `NEW_PROJECT_SETUP.md` with four designer-facing steps and a selectable AI-agent setup prompt. Use semantic surface/background colors, existing typography and components, a two-column layout that stacks on mobile, and clipboard success/failure feedback with manual copying available. The section does not run commands or alter configuration. See [the plan](../plan/design-system-landing-page.md#designer-quick-setup).
 
-The Cards showcase uses independent, varied-height card stacks inspired by the supplied shadcn reference. Compact revenue, order status and payment-method examples reuse Digital Dashboard sample figures and existing Vuetify primitives. Keep three columns on desktop, two on tablet and one on mobile, with theme-aware `surface` cards and existing semantic colors; retain interactive form and notification state across tabs. See [the showcase revision](../plan/design-system-landing-page.md#showcase-revision).
+The landing Cards showcase uses independent, varied-height card stacks inspired by the supplied shadcn reference. Compact revenue, order status and payment-method examples reuse Digital Dashboard sample figures and existing Vuetify primitives. On `/landing`, pass `gallery` to `LandingCardsShowcase`: retain three columns with a 320px minimum column width and 24px gaps, using a focusable, locally horizontally scrollable region on narrower screens. Keep native typography and control sizes; do not scale the gallery or hide interactive cards behind a fade. Below 1200px, separate showcase tabs and brand controls into full-width toolbar rows and show a horizontal-scroll hint. The Create studio keeps the default three/two/one-column responsive layout. Use theme-aware `surface` cards and existing semantic colors; retain interactive form and notification state across tabs. See [the showcase revision](../plan/design-system-landing-page.md#showcase-revision).
 
 `/landing` provides a standalone (`layout: 'blank'`, `public: true`) English showcase inspired by `ui.shadcn.com` with `/` redirecting to `/landing` and the original workspace at `/workspace`. A sticky `surface` header exposes the Materio mark, primary route links (`aria-current="page"` on Overview), and `NavbarThemeSwitcher`. The hero leads into one bordered showcase frame combining four `v-show` tab panels (`LandingCardsShowcase`, `LandingCrudShowcase`, `LandingFoundationsShowcase`, and `LandingFormStepperShowcase`) with live runtime brand-primary presets (`getBrandThemeColors()`), explicit reset to the configured default (`#10AF13`), and accessible `NUXT_PUBLIC_BRAND_PRIMARY` `.env` copy feedback. Per user selection, the CRUD tab configures `UiTableView` with `mobileCards` and an explicit `#mobile-cards` slot below `760px`. Below the showcase, a searchable directory derives links directly from `mainNavItems`. No new typography or color tokens are introduced. See [the landing page plan](../plan/design-system-landing-page.md).
 
@@ -36,7 +42,7 @@ Page & Template > Class List follows Figma node `383:33307` and the Assessments 
 
 ### Order template
 
-Each Page & Template example provides a Template prompt dialog with a selectable, copyable project-adaptation brief. `TemplatePrompt` reuses the shared prompt definitions in `data/templatePrompts.ts`; failed clipboard access leaves the full prompt available for manual copying. Prompts preserve each example's selected mobile layout and distinguish demo data from backend integration.
+Each Page & Template example provides a Template prompt dialog with a selectable, copyable project-adaptation brief. `TemplatePrompt` reuses the shared prompt definitions in `data/templatePrompts.ts`; failed clipboard access leaves the full prompt available for manual copying. Templates and patterns are references for structure and interactions: agents adapt the domain, content, data and integrations to the user's needs. Prompts preserve each example's selected mobile layout and distinguish demo data from backend integration.
 
 Page & Template > Digital Dashboard ports the Inwan digital-product layout with local sample data, Poppins, semantic theme colors, surface cards and zero elevation. Latest Order keeps horizontal table scrolling on mobile per user selection. Charts honor reduced motion. See [the plan](../plan/digital-dashboard.md).
 
@@ -197,7 +203,7 @@ The light theme configures standard Vuetify colors along with system background,
 
 ### Vuetify Dark Theme Colors
 
-The dark theme shifts backgrounds and surfaces to darker values while retaining the brand primary colors for consistent user experience.
+The default dark theme uses the Zinc neutral palette while retaining the brand primary and semantic status colors. The `/create` Materio Default selection uses the existing Materio light palette and this Zinc dark palette. Dark supporting surfaces use `#27272A` for chat, expansion content and table headers, `#3F3F46` for tracks and scrollbar thumbs, and `#FAFAFA` for borders and tooltips.
 
 | Vuetify Color Key | Hex Value | Description / Usage |
 | :--- | :--- | :--- |
@@ -209,12 +215,12 @@ The dark theme shifts backgrounds and surfaces to darker values while retaining 
 | `info` | `#16B1FF` | Informational alerts and indicators |
 | `warning` | `#FFB400` | Warning messages and indicators |
 | `error` | `#FF4C51` | Failure notifications and fields |
-| `background` | `#28243D` | Dark mode base layout background |
-| `on-background` | `#E7E3FC` | High-readability white/grey text for dark backgrounds |
-| `surface` | `#312D4B` | Dark mode card container and surface background |
-| `on-surface` | `#E7E3FC` | Text/icon color placed on top of `surface` elements |
-| `track-bg` | `#474360` | Dark mode progress track |
-| `chat-bg` | `#373452` | Dark mode chat bubble container |
+| `background` | `#09090B` | Dark mode base layout background |
+| `on-background` | `#FAFAFA` | High-readability white/grey text for dark backgrounds |
+| `surface` | `#18181B` | Dark mode card container and surface background |
+| `on-surface` | `#FAFAFA` | Text/icon color placed on top of `surface` elements |
+| `track-bg` | `#3F3F46` | Dark mode progress track |
+| `chat-bg` | `#27272A` | Dark mode chat bubble container |
 
 ### Grey Palette Specification
 
@@ -223,16 +229,16 @@ Grey tokens are utilized for semantic text weights, borders, dividers, and vario
 | Grey Token | Light Mode Hex Value | Dark Mode Hex Value | Main Usage |
 | :--- | :--- | :--- | :--- |
 | `grey-light` | `#FAFAFA` | - | Figma design token for light grey background |
-| `grey-50` | `#FAFAFA` | `#2A2E42` | Very light tint / container offsets |
-| `grey-100` | `#F5F5F5` | `#2F3349` | Divider lines and border outlines |
-| `grey-200` | `#EEEEEE` | `#4A5072` | Layout grid dividers |
-| `grey-300` | `#E0E0E0` | `#5E6692` | Placeholders, disabled elements |
-| `grey-400` | `#BDBDBD` | `#7983BB` | Secondary border colors |
-| `grey-500` | `#9E9E9E` | `#8692D0` | Standard muted texts and secondary icons |
-| `grey-600` | `#757575` | `#AAB3DE` | Active states on muted content |
-| `grey-700` | `#616161` | `#B6BEE3` | Medium emphasis content |
-| `grey-800` | `#424242` | `#CFD3EC` | High emphasis dark text (Light theme) |
-| `grey-900` | `#212121` | `#E7E9F6` | Title texts / near-black headers |
+| `grey-50` | `#FAFAFA` | `#18181B` | Very light tint / container offsets |
+| `grey-100` | `#F5F5F5` | `#27272A` | Divider lines and border outlines |
+| `grey-200` | `#EEEEEE` | `#3F3F46` | Layout grid dividers |
+| `grey-300` | `#E0E0E0` | `#52525B` | Placeholders, disabled elements |
+| `grey-400` | `#BDBDBD` | `#71717A` | Secondary border colors |
+| `grey-500` | `#9E9E9E` | `#A1A1AA` | Standard muted texts and secondary icons |
+| `grey-600` | `#757575` | `#D4D4D8` | Active states on muted content |
+| `grey-700` | `#616161` | `#E4E4E7` | Medium emphasis content |
+| `grey-800` | `#424242` | `#F4F4F5` | High emphasis dark text (Light theme) |
+| `grey-900` | `#212121` | `#FAFAFA` | Title texts / near-black headers |
 
 ## 4. Figma-to-Project Component Mapping
 
@@ -358,7 +364,7 @@ Below details what specific color and typography tokens are configured on these 
 #### Layout & Grid (`VRow`, `VCol`)
 
 - **Typography:** None.
-- **Colors:** Implicitly inherits `background` (`#FAFAFA` in light theme, `#28243D` in dark theme).
+- **Colors:** Implicitly inherits `background` (`#FAFAFA` in light theme, `#09090B` in dark theme).
 - **Layout rule:** Page-level and section-level layouts must use Vuetify `VRow` and `VCol`. Do not use raw `div`-based CSS Grid for outer page shells or primary columns.
 - **Spacing rule:** Use `gap: 24px` (`gap-6` equivalent) between primary layout sections. Keep spacing consistent across desktop, tablet, and mobile breakpoints.
 - **Sizing rule:** Use `cols="12"` as the mobile baseline, then add Vuetify breakpoint props such as `sm`, `md`, or `lg` for larger layouts.
@@ -378,9 +384,9 @@ Below details what specific color and typography tokens are configured on these 
 
 - **Typography:** Titles map to `h6` or `subtitle-1`. Text maps to `body-2` or `body-1`.
 - **Colors:**
-  - `VCard` backgrounds use `surface` (`#FFFFFF` light, `#312D4B` dark), including outlined cards; apply `bg-surface` when needed. Why: distinguish cards from the page background while keeping both themes readable.
+  - `VCard` backgrounds use `surface` (`#FFFFFF` light, `#18181B` dark), including outlined cards; apply `bg-surface` when needed. Why: distinguish cards from the page background while keeping both themes readable.
   <!-- 2026-11-25: "berikan background putih untuk background cardnya" -->
-  - Borders/actions use `grey-100` (`#F5F5F5` light, `#2F3349` dark).
+  - Borders/actions use `grey-100` (`#F5F5F5` light, `#27272A` dark).
 
 #### Buttons & Actions (`VBtn`, `VIcon`)
 
@@ -410,6 +416,6 @@ Below details what specific color and typography tokens are configured on these 
 
 #### Tables & Data Representation (`UiTableView`, `VDataTable`, `VDataTableServer`)
 
-- **Typography:** Table headers use `subtitle-2` or `overline`. Cell text uses `body-2`.
-- **Colors:** Row borders use `grey-100`. Alternate rows or hover states use `grey-50` (`#FAFAFA` light, `#2A2E42` dark).
+- **Typography:** Table headers use `subtitle-2` or `overline`. Primary cell text uses `body-1` (15px, `text-body-1`); supporting text within a cell uses `body-2` (13px, `text-body-2`).
+- **Colors:** Row borders use `grey-100`. Alternate rows or hover states use `grey-50` (`#FAFAFA` light, `#18181B` dark).
 - **Responsive pattern:** Keep `VDataTable` for desktop and use `UiTableView`'s optional `mobileCards` mode with an explicit `mobile-cards` slot when mobile needs different content grouping or action hierarchy. Avoid `nth-child` and pseudo-element labels for structural transformations.

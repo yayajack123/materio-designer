@@ -10,6 +10,8 @@ interface TeamMember {
   role: 'Owner' | 'Editor' | 'Viewer'
 }
 
+withDefaults(defineProps<{ gallery?: boolean }>(), { gallery: false })
+
 const emit = defineEmits<{
   (e: 'notify', message: string): void
 }>()
@@ -100,7 +102,7 @@ const saveNotifications = () => {
 </script>
 
 <template>
-  <VRow>
+  <VRow :class="{ 'showcase-gallery': gallery }">
     <!-- Column 1: Workspace profile form + System coverage -->
     <VCol cols="12" md="6" lg="4">
       <div class="showcase-column d-flex flex-column gap-6">
@@ -440,6 +442,29 @@ const saveNotifications = () => {
 <style scoped lang="scss">
 .showcase-column { block-size: 100%; }
 .showcase-column > :last-child { flex-grow: 1; }
+
+.showcase-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(320px, 1fr));
+  align-items: start;
+  gap: 24px;
+  margin: 0;
+
+  > .v-col-12 {
+    min-inline-size: 0;
+    max-inline-size: none;
+    inline-size: auto;
+    padding: 0;
+  }
+
+  .showcase-column {
+    block-size: auto;
+  }
+
+  .showcase-column > :last-child {
+    flex-grow: 0;
+  }
+}
 
 :deep(.v-card) {
   border-radius: 16px;

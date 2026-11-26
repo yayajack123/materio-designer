@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit page design system"
+  short_description: "Audit komponen, token, default, dan override halaman"
+  default_prompt: "Gunakan $audit-page-design-system untuk mengaudit komponen dan token pada halaman yang saya tentukan."

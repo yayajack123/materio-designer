@@ -54,6 +54,8 @@ export const mainNavItems = [
       { title: 'Class List', to: { name: 'page-template-class-list' }, icon: { icon: 'ri-circle-line' } },
       { title: 'Detail Page', to: { name: 'page-template-detail-page', query: { id: '1', tab: 'details' } }, icon: { icon: 'ri-circle-line' } },
       { title: 'Order', to: { name: 'page-template-order' }, icon: { icon: 'ri-circle-line' } },
+      { title: 'Chat', to: { name: 'page-template-chat' }, icon: { icon: 'ri-circle-line' } },
+      { title: 'Form', to: { name: 'page-template-form' }, icon: { icon: 'ri-circle-line' } },
       { title: 'Digital Dashboard', to: { name: 'page-template-digital-dashboard' }, icon: { icon: 'ri-circle-line' } },
     ],
   },
